@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>성남시 아동수당 가맹점 지도</title>
+    <!-- 
+    카카오맵 API 키 설정 방법:
+    1. https://developers.kakao.com/ 에서 애플리케이션을 등록합니다.
+    2. JavaScript 키를 발급받습니다.
+    3. 아래 KAKAO_APP_KEY 부분을 발급받은 JavaScript 키로 교체합니다.
+    -->
+    <script
+      type="text/javascript"
+      src="//dapi.kakao.com/v2/maps/sdk.js?appkey=fa4d39907c53774d2ab2ac7cfe8d26ee&libraries=services,clusterer"
+    ></script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
+</html>

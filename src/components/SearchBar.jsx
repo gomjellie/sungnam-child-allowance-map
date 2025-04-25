@@ -1,0 +1,66 @@
+import { useState } from 'react';
+import styled from 'styled-components';
+
+const SearchContainer = styled.div`
+  position: relative;
+  width: 100%;
+`;
+
+const SearchInput = styled.input`
+  padding: 10px 15px 10px 35px;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  width: 100%;
+  background-color: #f5f7fa;
+  transition: all 0.2s ease;
+  
+  &:focus {
+    outline: none;
+    background-color: white;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+  
+  &::placeholder {
+    color: #999;
+  }
+`;
+
+const SearchIcon = styled.div`
+  position: absolute;
+  left: 15px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+`;
+
+const SearchBar = ({ onSearchChange }) => {
+  const [searchValue, setSearchValue] = useState('');
+
+  const handleSearchChange = (e) => {
+    const value = e.target.value;
+    setSearchValue(value);
+    onSearchChange(value);
+  };
+
+  return (
+    <SearchContainer>
+      <SearchIcon>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M15.5 14H14.71L14.43 13.73C15.41 12.59 16 11.11 16 9.5C16 5.91 13.09 3 9.5 3C5.91 3 3 5.91 3 9.5C3 13.09 5.91 16 9.5 16C11.11 16 12.59 15.41 13.73 14.43L14 14.71V15.5L19 20.49L20.49 19L15.5 14ZM9.5 14C7.01 14 5 11.99 5 9.5C5 7.01 7.01 5 9.5 5C11.99 5 14 7.01 14 9.5C14 11.99 11.99 14 9.5 14Z" fill="currentColor"/>
+        </svg>
+      </SearchIcon>
+      <SearchInput 
+        type="text" 
+        placeholder="성남시 아동수당 가맹점 이름 또는 주소 검색..."
+        value={searchValue}
+        onChange={handleSearchChange}
+      />
+    </SearchContainer>
+  );
+};
+
+export default SearchBar;
