@@ -37,6 +37,7 @@ const CategoryContainer = styled.div`
   overflow-x: auto;
   padding: 4px 0;
   scrollbar-width: none;
+  touch-action: pan-x;
   -ms-overflow-style: none;
   &::-webkit-scrollbar {
     display: none;

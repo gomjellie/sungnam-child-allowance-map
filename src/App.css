@@ -12,11 +12,12 @@ body {
   -moz-osx-font-smoothing: grayscale;
   background-color: #f8f9fa;
   color: #333;
+  height: 100dvh;
 }
 
 #root {
   width: 100%;
-  min-height: 100vh;
+  max-height: 100dvh;
 }
 
 button {

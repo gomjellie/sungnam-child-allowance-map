@@ -8,7 +8,7 @@ import SearchBar from './components/SearchBar';
 
 const AppContainer = styled.div`
   width: 100%;
-  height: 100vh;
+  height: 100dvh;
   display: flex;
   flex-direction: column;
   font-family: 'Noto Sans KR', sans-serif;
@@ -42,18 +42,18 @@ const Footer = styled.footer`
 
 const StoreListContainer = styled.div`
   position: absolute;
-  bottom: 0;
   left: 0;
   right: 0;
   background: white;
   border-radius: 20px 20px 0 0;
   box-shadow: 0 -4px 10px rgba(0, 0, 0, 0.1);
   z-index: 100;
-  transition: height 0.3s ease;
-  height: ${props => props.height}%;
   display: flex;
   flex-direction: column;
   touch-action: none;
+  bottom: env(safe-area-inset-bottom);
+  height: 40dvh;
+  max-height: 90dvh;
 `;
 
 const DragHandle = styled.div`
@@ -128,12 +128,16 @@ function App() {
   const [categories, setCategories] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState('전체');
   const [searchTerm, setSearchTerm] = useState('');
-  const [containerHeight, setContainerHeight] = useState(40);
-  const containerHeightRef = useRef(containerHeight);
+  const $bottomSheetRef = useRef(null);
+  const containerHeightRef = useRef(40);
 
   useEffect(() => {
-    containerHeightRef.current = containerHeight;
-  }, [containerHeight]);
+    const handleViewportResize = () => {
+      containerHeightRef.current = Number($bottomSheetRef.current.style.height.replace('dvh', '') || '40');
+    };
+    window.visualViewport.addEventListener('resize', handleViewportResize);
+    return () => window.visualViewport.removeEventListener('resize', handleViewportResize);
+  }, []);
 
   const handleDragStart = (e) => {
     const startY = e.type.includes('mouse') ? e.clientY : e.touches[0].clientY;
@@ -142,13 +146,22 @@ function App() {
     const handleDrag = (moveEvent) => {
       const currentY = moveEvent.type.includes('mouse') ? moveEvent.clientY : moveEvent.touches[0].clientY;
       const deltaY = startY - currentY;
-      const deltaPercent = (deltaY / window.innerHeight) * 100;
+      const deltaPercent = (deltaY / window.visualViewport.height) * 100;
       const newHeight = Math.min(Math.max(startHeight + deltaPercent, 10), 90);
-      
-      setContainerHeight(newHeight);
+
+      /** @type {HTMLDivElement} */
+      const $bottomSheet = $bottomSheetRef.current;
+      $bottomSheet.style.height = `${newHeight}dvh`;
+      containerHeightRef.current = newHeight;
     };
     
     const handleDragEnd = () => {
+      /** @type {HTMLDivElement} */
+      const $bottomSheet = $bottomSheetRef.current;
+      $bottomSheet.style.transition = 'height 0.3s ease';
+      setTimeout(() => {
+        $bottomSheet.style.transition = 'none';
+      }, 300);
       document.removeEventListener('mousemove', handleDrag);
       document.removeEventListener('mouseup', handleDragEnd);
       document.removeEventListener('touchmove', handleDrag);
@@ -158,7 +171,8 @@ function App() {
       const closestPoint = snapPoints.reduce((prev, curr) => 
         Math.abs(curr - containerHeightRef.current) < Math.abs(prev - containerHeightRef.current) ? curr : prev
       );
-      setContainerHeight(closestPoint);
+      $bottomSheet.style.height = `${closestPoint}dvh`;
+      containerHeightRef.current = closestPoint;
     };
     
     document.addEventListener('mousemove', handleDrag);
@@ -215,7 +229,7 @@ function App() {
           selectedCategory={selectedCategory} 
         />
       </MapSection>
-      <StoreListContainer height={containerHeight} onTouchStart={handleDragStart}>
+      <StoreListContainer ref={$bottomSheetRef} onTouchStart={handleDragStart}>
         <DragHandle onMouseDown={handleDragStart} />
         <StoreFilter 
           categories={categories}
