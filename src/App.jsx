@@ -36,7 +36,7 @@ const Footer = styled.footer`
   padding: 8px;
   height: 24px;
   text-align: center;
-  line-height: 1.0;
+  line-height: 1;
   font-size: 12px;
   color: #666;
   background: white;
@@ -103,7 +103,7 @@ const StoreCard = styled.div`
   background-color: white;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
   transition: transform 0.2s;
-  
+
   &:hover {
     transform: translateY(-3px);
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
@@ -132,7 +132,10 @@ const StoreCategory = styled.span`
 
 function App() {
   const stores = useMemo(fetchStores, []);
-  const categories = useMemo(() => [...new Set(fetchStores().map(store => store.category))], []);
+  const categories = useMemo(
+    () => [...new Set(fetchStores().map((store) => store.category))],
+    []
+  );
   const [map, setMap] = useState(/** @type {kakao.maps.Map | null} */ (null));
   const [filteredStores, setFilteredStores] = useState(fetchStores);
   const [selectedCategory, setSelectedCategory] = useState('전체');
@@ -143,10 +146,13 @@ function App() {
 
   useEffect(() => {
     const handleViewportResize = () => {
-      containerHeightRef.current = Number($bottomSheetRef.current.style.height.replace('dvh', '') || '40');
+      containerHeightRef.current = Number(
+        $bottomSheetRef.current.style.height.replace('dvh', '') || '40'
+      );
     };
     window.visualViewport.addEventListener('resize', handleViewportResize);
-    return () => window.visualViewport.removeEventListener('resize', handleViewportResize);
+    return () =>
+      window.visualViewport.removeEventListener('resize', handleViewportResize);
   }, []);
 
   const handleDragStart = (e) => {
@@ -155,9 +161,11 @@ function App() {
     const startTime = Date.now();
     const touchPoints = [{ y: startY, time: startTime }];
     const MAX_POINTS = 5; // 최대 기록할 포인트 수
-    
+
     const handleDrag = (moveEvent) => {
-      const currentY = moveEvent.type.includes('mouse') ? moveEvent.clientY : moveEvent.touches[0].clientY;
+      const currentY = moveEvent.type.includes('mouse')
+        ? moveEvent.clientY
+        : moveEvent.touches[0].clientY;
       const currentTime = Date.now();
       const deltaY = startY - currentY;
       const deltaPercent = (deltaY / window.visualViewport.height) * 100;
@@ -167,52 +175,61 @@ function App() {
       const $bottomSheet = $bottomSheetRef.current;
       $bottomSheet.style.height = `${newHeight}dvh`;
       containerHeightRef.current = newHeight;
-      
+
       touchPoints.push({ y: currentY, time: currentTime });
       if (touchPoints.length > MAX_POINTS) {
         touchPoints.shift(); // 가장 오래된 포인트 제거
       }
     };
-    
+
     const handleDragEnd = () => {
       /** @type {HTMLDivElement} */
       const $bottomSheet = $bottomSheetRef.current;
       const snapPoints = [10, 40, 90];
       const currentHeight = containerHeightRef.current;
-      
+
       // 최근 터치 포인트들의 속도 계산
       const velocities = [];
       for (let i = 1; i < touchPoints.length; i++) {
-        const deltaY = touchPoints[i].y - touchPoints[i-1].y;
-        const deltaTime = touchPoints[i].time - touchPoints[i-1].time;
+        const deltaY = touchPoints[i].y - touchPoints[i - 1].y;
+        const deltaTime = touchPoints[i].time - touchPoints[i - 1].time;
         velocities.push(deltaY / deltaTime); // px/ms
       }
-      
+
       // 평균 속도 계산
-      const avgVelocity = velocities.reduce((sum, v) => sum + v, 0) / velocities.length;
-      
+      const avgVelocity =
+        velocities.reduce((sum, v) => sum + v, 0) / velocities.length;
+
       let targetPoint;
       const VELOCITY_THRESHOLD = 0.3; // 속도 임계값 조정 (px/ms)
-      
+
       if (Math.abs(avgVelocity) > VELOCITY_THRESHOLD) {
         // 빠른 속도로 드래그 했을 때
         const direction = avgVelocity > 0 ? -1 : 1; // 위로 드래그하면 -1, 아래로 드래그하면 1
-        const currentIndex = snapPoints.findIndex(point => point >= currentHeight);
-        const targetIndex = Math.max(0, Math.min(snapPoints.length - 1, currentIndex + direction));
+        const currentIndex = snapPoints.findIndex(
+          (point) => point >= currentHeight
+        );
+        const targetIndex = Math.max(
+          0,
+          Math.min(snapPoints.length - 1, currentIndex + direction)
+        );
         targetPoint = snapPoints[targetIndex];
       } else {
         // 천천히 드래그 했을 때는 가장 가까운 스냅 포인트로
-        targetPoint = snapPoints.reduce((prev, curr) => 
-          Math.abs(curr - currentHeight) < Math.abs(prev - currentHeight) ? curr : prev
+        targetPoint = snapPoints.reduce((prev, curr) =>
+          Math.abs(curr - currentHeight) < Math.abs(prev - currentHeight)
+            ? curr
+            : prev
         );
       }
-      
+
       // 속도에 따라 transition 시간 조정
-      const transitionDuration = Math.abs(avgVelocity) > VELOCITY_THRESHOLD ? 0.2 : 0.3;
+      const transitionDuration =
+        Math.abs(avgVelocity) > VELOCITY_THRESHOLD ? 0.2 : 0.3;
       $bottomSheet.style.transition = `height ${transitionDuration}s ease`;
       $bottomSheet.style.height = `${targetPoint}dvh`;
       containerHeightRef.current = targetPoint;
-      
+
       setTimeout(() => {
         $bottomSheet.style.transition = 'none';
       }, transitionDuration * 1000);
@@ -221,29 +238,30 @@ function App() {
       document.removeEventListener('touchmove', handleDrag);
       document.removeEventListener('touchend', handleDragEnd);
     };
-    
+
     document.addEventListener('mousemove', handleDrag);
     document.addEventListener('mouseup', handleDragEnd);
     document.addEventListener('touchmove', handleDrag, { passive: false });
     document.addEventListener('touchend', handleDragEnd);
   };
-  
+
   const handleFilter = (category, search) => {
     let result = stores;
-    
+
     // 카테고리 필터링
     if (category !== '전체') {
-      result = result.filter(store => store.category === category);
+      result = result.filter((store) => store.category === category);
     }
-    
+
     // 검색어 필터링
     if (search) {
-      result = result.filter(store => 
-        store.name.toLowerCase().includes(search.toLowerCase()) ||
-        store.address.toLowerCase().includes(search.toLowerCase())
+      result = result.filter(
+        (store) =>
+          store.name.toLowerCase().includes(search.toLowerCase()) ||
+          store.address.toLowerCase().includes(search.toLowerCase())
       );
     }
-    
+
     setFilteredStores(result);
   };
 
@@ -273,39 +291,61 @@ function App() {
         <SearchBarContainer>
           <SearchBar onSearchChange={handleSearchChange} />
         </SearchBarContainer>
-        <KakaoMap map={map} onCreateMap={setMap} stores={filteredStores} selectedStore={selectedStore} onSelectStore={setSelectedStore} />
+        <KakaoMap
+          map={map}
+          onCreateMap={setMap}
+          stores={filteredStores}
+          selectedStore={selectedStore}
+          onSelectStore={setSelectedStore}
+        />
       </MapSection>
-      <StoreListContainer ref={$bottomSheetRef} >
-        <DragHandle onTouchStart={handleDragStart} onMouseDown={handleDragStart} />
-        <StoreFilter 
+      <StoreListContainer ref={$bottomSheetRef}>
+        <DragHandle
+          onTouchStart={handleDragStart}
+          onMouseDown={handleDragStart}
+        />
+        <StoreFilter
           categories={categories}
           onCategoryChange={handleCategoryChange}
         />
-        <StoreListHeader onTouchStart={handleDragStart} onMouseDown={handleDragStart}>
+        <StoreListHeader
+          onTouchStart={handleDragStart}
+          onMouseDown={handleDragStart}
+        >
           <StoreCount>가맹점 {filteredStores.length}개</StoreCount>
         </StoreListHeader>
         <StoreListContent>
-          {filteredStores.map(store => (
-            <StoreCard key={store.id} onClick={() => {
-              setSelectedStore(store);
-              if (map) {
-                const moveLatLng = new window.kakao.maps.LatLng(store.lat, store.lng);
-                // map.setLevel(3); // 지도 확대 레벨 설정
-                map.panTo(moveLatLng);
-              }
-            }} style={{ cursor: 'pointer' }}>
+          {filteredStores.map((store) => (
+            <StoreCard
+              key={store.id}
+              onClick={() => {
+                setSelectedStore(store);
+                if (map) {
+                  const moveLatLng = new window.kakao.maps.LatLng(
+                    store.lat,
+                    store.lng
+                  );
+                  // map.setLevel(3); // 지도 확대 레벨 설정
+                  map.panTo(moveLatLng);
+                }
+              }}
+              style={{ cursor: 'pointer' }}
+            >
               <StoreName>{store.name}</StoreName>
               <StoreCategory>{store.category}</StoreCategory>
               <StoreInfo>{store.address}</StoreInfo>
             </StoreCard>
           ))}
-        <Footer>
-          © 2025 성남시 아동수당 가맹점 지도 | 데이터 출처: <a href='https://www.shinhancard.com/mob/MOBFM204N/MOBFM204R11.shc'>신한카드</a>
-        </Footer>
+          <Footer>
+            © 2025 성남시 아동수당 가맹점 지도 | 데이터 출처:{' '}
+            <a href="https://www.shinhancard.com/mob/MOBFM204N/MOBFM204R11.shc">
+              신한카드
+            </a>
+          </Footer>
         </StoreListContent>
       </StoreListContainer>
     </AppContainer>
-  )
+  );
 }
 
-export default App
+export default App;
