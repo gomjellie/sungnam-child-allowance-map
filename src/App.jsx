@@ -149,9 +149,13 @@ function App() {
   const handleDragStart = (e) => {
     const startY = e.type.includes('mouse') ? e.clientY : e.touches[0].clientY;
     const startHeight = containerHeightRef.current;
+    const startTime = Date.now();
+    const touchPoints = [{ y: startY, time: startTime }];
+    const MAX_POINTS = 5; // 최대 기록할 포인트 수
     
     const handleDrag = (moveEvent) => {
       const currentY = moveEvent.type.includes('mouse') ? moveEvent.clientY : moveEvent.touches[0].clientY;
+      const currentTime = Date.now();
       const deltaY = startY - currentY;
       const deltaPercent = (deltaY / window.visualViewport.height) * 100;
       const newHeight = Math.min(Math.max(startHeight + deltaPercent, 10), 90);
@@ -160,26 +164,59 @@ function App() {
       const $bottomSheet = $bottomSheetRef.current;
       $bottomSheet.style.height = `${newHeight}dvh`;
       containerHeightRef.current = newHeight;
+      
+      touchPoints.push({ y: currentY, time: currentTime });
+      if (touchPoints.length > MAX_POINTS) {
+        touchPoints.shift(); // 가장 오래된 포인트 제거
+      }
     };
     
     const handleDragEnd = () => {
       /** @type {HTMLDivElement} */
       const $bottomSheet = $bottomSheetRef.current;
-      $bottomSheet.style.transition = 'height 0.3s ease';
+      const snapPoints = [10, 40, 90];
+      const currentHeight = containerHeightRef.current;
+      
+      // 최근 터치 포인트들의 속도 계산
+      const velocities = [];
+      for (let i = 1; i < touchPoints.length; i++) {
+        const deltaY = touchPoints[i].y - touchPoints[i-1].y;
+        const deltaTime = touchPoints[i].time - touchPoints[i-1].time;
+        velocities.push(deltaY / deltaTime); // px/ms
+      }
+      
+      // 평균 속도 계산
+      const avgVelocity = velocities.reduce((sum, v) => sum + v, 0) / velocities.length;
+      
+      let targetPoint;
+      const VELOCITY_THRESHOLD = 0.3; // 속도 임계값 조정 (px/ms)
+      
+      if (Math.abs(avgVelocity) > VELOCITY_THRESHOLD) {
+        // 빠른 속도로 드래그 했을 때
+        const direction = avgVelocity > 0 ? -1 : 1; // 위로 드래그하면 -1, 아래로 드래그하면 1
+        const currentIndex = snapPoints.findIndex(point => point >= currentHeight);
+        const targetIndex = Math.max(0, Math.min(snapPoints.length - 1, currentIndex + direction));
+        targetPoint = snapPoints[targetIndex];
+      } else {
+        // 천천히 드래그 했을 때는 가장 가까운 스냅 포인트로
+        targetPoint = snapPoints.reduce((prev, curr) => 
+          Math.abs(curr - currentHeight) < Math.abs(prev - currentHeight) ? curr : prev
+        );
+      }
+      
+      // 속도에 따라 transition 시간 조정
+      const transitionDuration = Math.abs(avgVelocity) > VELOCITY_THRESHOLD ? 0.2 : 0.3;
+      $bottomSheet.style.transition = `height ${transitionDuration}s ease`;
+      $bottomSheet.style.height = `${targetPoint}dvh`;
+      containerHeightRef.current = targetPoint;
+      
       setTimeout(() => {
         $bottomSheet.style.transition = 'none';
-      }, 300);
+      }, transitionDuration * 1000);
       document.removeEventListener('mousemove', handleDrag);
       document.removeEventListener('mouseup', handleDragEnd);
       document.removeEventListener('touchmove', handleDrag);
       document.removeEventListener('touchend', handleDragEnd);
-  
-      const snapPoints = [10, 40, 90];
-      const closestPoint = snapPoints.reduce((prev, curr) => 
-        Math.abs(curr - containerHeightRef.current) < Math.abs(prev - containerHeightRef.current) ? curr : prev
-      );
-      $bottomSheet.style.height = `${closestPoint}dvh`;
-      containerHeightRef.current = closestPoint;
     };
     
     document.addEventListener('mousemove', handleDrag);
