@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 import styled from 'styled-components';
 import KakaoMap from './components/KakaoMap';
 import StoreFilter from './components/StoreFilter';
@@ -131,11 +131,13 @@ const StoreCategory = styled.span`
 `;
 
 function App() {
-  const [stores, setStores] = useState(fetchStores);
+  const stores = useMemo(fetchStores, []);
+  const categories = useMemo(() => [...new Set(fetchStores().map(store => store.category))], []);
+  const [map, setMap] = useState(/** @type {kakao.maps.Map | null} */ (null));
   const [filteredStores, setFilteredStores] = useState(fetchStores);
-  const [categories, setCategories] = useState(() => [...new Set(fetchStores().map(store => store.category))]);
   const [selectedCategory, setSelectedCategory] = useState('전체');
   const [searchTerm, setSearchTerm] = useState('');
+  const [selectedStore, setSelectedStore] = useState(null);
   const $bottomSheetRef = useRef(null);
   const containerHeightRef = useRef(40);
 
@@ -226,24 +228,6 @@ function App() {
     document.addEventListener('touchend', handleDragEnd);
   };
   
-  // 가맹점 데이터 가져오기
-  const getStores = async () => {
-    try {
-      const storeData = await fetchStores();
-      setStores(storeData);
-      
-      // 카테고리 추출
-      const uniqueCategories = [...new Set(storeData.map(store => store.category))];
-      setCategories(uniqueCategories);
-    } catch (error) {
-      console.error('가맹점 데이터를 가져오는 중 오류가 발생했습니다:', error);
-    }
-  };
-
-  useEffect(() => {
-    getStores();
-  }, []);
-
   const handleFilter = (category, search) => {
     let result = stores;
     
@@ -269,8 +253,8 @@ function App() {
   };
 
   const handleCategoryChange = (category) => {
-    setSelectedCategory(category);
     handleFilter(category, searchTerm);
+    setSelectedCategory(category);
   };
 
   return (
@@ -279,7 +263,7 @@ function App() {
         <SearchBarContainer>
           <SearchBar onSearchChange={handleSearchChange} />
         </SearchBarContainer>
-        <KakaoMap stores={filteredStores} />
+        <KakaoMap map={map} onCreateMap={setMap} stores={filteredStores} selectedStore={selectedStore} onSelectStore={setSelectedStore} />
       </MapSection>
       <StoreListContainer ref={$bottomSheetRef} >
         <DragHandle onTouchStart={handleDragStart} onMouseDown={handleDragStart} />
@@ -292,7 +276,14 @@ function App() {
         </StoreListHeader>
         <StoreListContent>
           {filteredStores.map(store => (
-            <StoreCard key={store.id}>
+            <StoreCard key={store.id} onClick={() => {
+              setSelectedStore(store);
+              if (map) {
+                const moveLatLng = new window.kakao.maps.LatLng(store.lat, store.lng);
+                // map.setLevel(3); // 지도 확대 레벨 설정
+                map.panTo(moveLatLng);
+              }
+            }} style={{ cursor: 'pointer' }}>
               <StoreName>{store.name}</StoreName>
               <StoreCategory>{store.category}</StoreCategory>
               <StoreInfo>{store.address}</StoreInfo>

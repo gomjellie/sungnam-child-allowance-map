@@ -1,5 +1,4 @@
-import { useState } from 'react';
-import { Map, MapMarker, MarkerClusterer, CustomOverlayMap } from 'react-kakao-maps-sdk';
+import { Map, MapMarker, MarkerClusterer,  CustomOverlayMap } from 'react-kakao-maps-sdk';
 import styled from 'styled-components';
 
 const MapContainer = styled.div`
@@ -68,10 +67,7 @@ const InfoTel = styled.p`
   }
 `;
 
-const KakaoMap = ({ stores }) => {
-  const [map, setMap] = useState(null);
-  const [selectedStore, setSelectedStore] = useState(null);
-
+const KakaoMap = ({ map, onCreateMap, stores, selectedStore, onSelectStore }) => {
   // 성남시 중심 좌표 (대략적인 위치)
   const defaultCenter = {
     lat: 37.4449168,
@@ -84,8 +80,11 @@ const KakaoMap = ({ stores }) => {
         center={defaultCenter}
         style={{ width: '100%', height: '100%' }}
         level={5} // 지도 확대 레벨
-        onCreate={setMap}
-        onClick={() => void setSelectedStore(null)}
+        onCreate={(map) => {
+          onCreateMap(map);
+          // map.panTo(1,)
+        }}
+        onClick={() => void onSelectStore(null)}
       >
         {map && (
           <MarkerClusterer
@@ -94,11 +93,10 @@ const KakaoMap = ({ stores }) => {
           >
             {stores.map((store) => (
               <MapMarker
+                key={`${store.name}-${store.lat}-${store.lng}`}
                 position={{ lat: store.lat, lng: store.lng }}
                 title={store.name}
-                onClick={() => {
-                  setSelectedStore(store);
-                }}
+                onClick={() => void onSelectStore(store)}
                 image={{
                   src: 'https://t1.daumcdn.net/localimg/localimages/07/mapapidoc/markerStar.png',
                   size: { width: 24, height: 35 },
@@ -142,7 +140,7 @@ const KakaoMap = ({ stores }) => {
                   }} 
                   onClick={(e) => {
                     e.stopPropagation();
-                    setSelectedStore(null);
+                    onSelectStore(null);
                   }}
                 >
                   ✕
