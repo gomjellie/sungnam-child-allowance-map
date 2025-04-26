@@ -8,6 +8,34 @@ const MapContainer = styled.div`
   position: relative;
 `;
 
+const LocationButton = styled.button`
+  position: absolute;
+  right: 16px;
+  bottom: 8px;
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
+  background-color: white;
+  border: none;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+  transition: all 0.2s ease;
+  color: black;
+  
+  &:active {
+    transform: scale(0.95);
+  }
+  
+  svg {
+    width: 24px;
+    height: 24px;
+  }
+`;
+
 const InfoWindow = styled.div`
   cursor: text;
   padding: 15px;
@@ -66,12 +94,37 @@ const InfoTel = styled.p`
     margin-right: 5px;
   }
 `;
+import { useState } from 'react';
 
 const KakaoMap = ({ map, onCreateMap, stores, selectedStore, onSelectStore }) => {
   // 성남시 중심 좌표 (대략적인 위치)
   const defaultCenter = {
     lat: 37.4449168,
     lng: 127.1388684,
+  };
+  const [currentPosition, setCurrentPosition] = useState(null);
+
+  const handleLocationClick = () => {
+    if (!map || !navigator.geolocation) return;
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        const moveLatLng = new window.kakao.maps.LatLng(
+          position.coords.latitude,
+          position.coords.longitude
+        );
+        setCurrentPosition({ lat: position.coords.latitude, lng: position.coords.longitude });
+        map.panTo(moveLatLng);
+      },
+      (error) => {
+        console.error('위치 정보를 가져오는데 실패했습니다:', error);
+        alert('위치 정보를 가져오는데 실패했습니다.');
+      },
+      {
+        enableHighAccuracy: true,
+        timeout: 5000,
+        maximumAge: 0
+      }
+    );
   };
 
   return (
@@ -86,24 +139,44 @@ const KakaoMap = ({ map, onCreateMap, stores, selectedStore, onSelectStore }) =>
         }}
         onClick={() => void onSelectStore(null)}
       >
+        <LocationButton onClick={handleLocationClick} title="현재 위치로 이동">
+          <svg viewBox="0 0 24 24" fill="none" xmlns="//www.w3.org/2000/svg">
+            <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" fill="white"/>
+            <circle cx="12" cy="12" r="4" fill="currentColor"/>
+            <line x1="12" y1="2" x2="12" y2="6" stroke="currentColor" stroke-width="2"/>
+            <line x1="12" y1="18" x2="12" y2="22" stroke="currentColor" stroke-width="2"/>
+            <line x1="2" y1="12" x2="6" y2="12" stroke="currentColor" stroke-width="2"/>
+            <line x1="18" y1="12" x2="22" y2="12" stroke="currentColor" stroke-width="2"/>
+          </svg>
+        </LocationButton>
+        {currentPosition && (
+          <MapMarker
+            position={currentPosition}
+            image={{
+              src: 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KICA8Y2lyY2xlIGN4PSIxMiIgY3k9IjEyIiByPSI4IiBmaWxsPSIjMzg4MEZGIiBmaWxsLW9wYWNpdHk9IjAuNiIgc3Ryb2tlPSJ3aGl0ZSIgc3Ryb2tlLXdpZHRoPSIyIi8+Cjwvc3ZnPg==',
+              size: { width: 24, height: 24 },
+            }}
+            zIndex={20}
+          />
+        )}
         {map && (
-          <MarkerClusterer
-            averageCenter={true}
-            minLevel={5}
-          >
-            {stores.map((store) => (
-              <MapMarker
-                key={`${store.name}-${store.lat}-${store.lng}`}
-                position={{ lat: store.lat, lng: store.lng }}
-                title={store.name}
-                onClick={() => void onSelectStore(store)}
-                image={{
-                  src: 'https://t1.daumcdn.net/localimg/localimages/07/mapapidoc/markerStar.png',
-                  size: { width: 24, height: 35 },
-                }}
-              />
-            ))}
-          </MarkerClusterer>
+<MarkerClusterer
+  averageCenter={true}
+  minLevel={5}
+>
+  {stores.map((store) => (
+    <MapMarker
+      key={`${store.name}-${store.lat}-${store.lng}`}
+      position={{ lat: store.lat, lng: store.lng }}
+      title={store.name}
+      onClick={() => void onSelectStore(store)}
+      image={{
+        src: 'https://t1.daumcdn.net/localimg/localimages/07/mapapidoc/markerStar.png',
+        size: { width: 24, height: 35 },
+      }}
+    />
+  ))}
+</MarkerClusterer>
         )}
         
         {selectedStore && (

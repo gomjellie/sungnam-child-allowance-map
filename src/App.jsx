@@ -43,7 +43,7 @@ const Footer = styled.footer`
 `;
 
 const StoreListContainer = styled.div`
-  position: absolute;
+  position: relative;
   left: 0;
   right: 0;
   background: white;
