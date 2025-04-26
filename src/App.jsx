@@ -24,7 +24,7 @@ const MapSection = styled.div`
 
 const SearchBarContainer = styled.div`
   position: absolute;
-  top: 24px;
+  top: 8px;
   left: 16px;
   right: 16px;
   z-index: 10;
