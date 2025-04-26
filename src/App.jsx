@@ -232,6 +232,7 @@ function App() {
 
       setTimeout(() => {
         $bottomSheet.style.transition = 'none';
+        map.relayout();
       }, transitionDuration * 1000);
       document.removeEventListener('mousemove', handleDrag);
       document.removeEventListener('mouseup', handleDragEnd);
