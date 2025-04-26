@@ -206,9 +206,14 @@ function App() {
       if (Math.abs(avgVelocity) > VELOCITY_THRESHOLD) {
         // 빠른 속도로 드래그 했을 때
         const direction = avgVelocity > 0 ? -1 : 1; // 위로 드래그하면 -1, 아래로 드래그하면 1
-        const currentIndex = snapPoints.findIndex(
-          (point) => point >= currentHeight
-        );
+        // find the closest snap point
+        const currentIndex = snapPoints
+          .map((point) => Math.abs(point - currentHeight))
+          .indexOf(
+            Math.min(
+              ...snapPoints.map((point) => Math.abs(point - currentHeight))
+            )
+          );
         const targetIndex = Math.max(
           0,
           Math.min(snapPoints.length - 1, currentIndex + direction)
