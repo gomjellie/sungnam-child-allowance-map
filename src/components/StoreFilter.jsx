@@ -7,7 +7,7 @@ const FilterContainer = styled.div`
   flex-direction: column;
   gap: 8px;
   background-color: transparent;
-  padding: 16px;
+  padding: 0 16px 16px 16px;
 `;
 
 const Title = styled.h2`
@@ -35,7 +35,6 @@ const CategoryContainer = styled.div`
   display: flex;
   gap: 8px;
   overflow-x: auto;
-  padding: 4px 0;
   scrollbar-width: none;
   touch-action: pan-x;
   -ms-overflow-style: none;

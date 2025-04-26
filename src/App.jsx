@@ -57,13 +57,20 @@ const StoreListContainer = styled.div`
 `;
 
 const DragHandle = styled.div`
-  width: 40px;
-  min-height: 4px;
-  height: 4px;
-  background-color: #ddd;
-  border-radius: 2px;
-  margin: 12px auto;
-  cursor: ns-resize;
+  width: 100%;
+  padding: 12px 0 28px 0;
+  cursor: grabbing;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  &::after {
+    content: '';
+    width: 40px;
+    height: 4px;
+    background-color: #ddd;
+    border-radius: 2px;
+  }
 `;
 
 const StoreListHeader = styled.div`
@@ -229,13 +236,13 @@ function App() {
           selectedCategory={selectedCategory} 
         />
       </MapSection>
-      <StoreListContainer ref={$bottomSheetRef} onTouchStart={handleDragStart}>
-        <DragHandle onMouseDown={handleDragStart} />
+      <StoreListContainer ref={$bottomSheetRef} >
+        <DragHandle onTouchStart={handleDragStart} onMouseDown={handleDragStart} />
         <StoreFilter 
           categories={categories}
           onCategoryChange={setSelectedCategory}
         />
-        <StoreListHeader>
+        <StoreListHeader onTouchStart={handleDragStart} onMouseDown={handleDragStart}>
           <StoreCount>가맹점 {filteredStores.length}개</StoreCount>
         </StoreListHeader>
         <StoreListContent>
