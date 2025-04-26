@@ -131,9 +131,9 @@ const StoreCategory = styled.span`
 `;
 
 function App() {
-  const [stores, setStores] = useState([]);
-  const [filteredStores, setFilteredStores] = useState([]);
-  const [categories, setCategories] = useState([]);
+  const [stores, setStores] = useState(fetchStores);
+  const [filteredStores, setFilteredStores] = useState(fetchStores);
+  const [categories, setCategories] = useState(() => [...new Set(fetchStores().map(store => store.category))]);
   const [selectedCategory, setSelectedCategory] = useState('전체');
   const [searchTerm, setSearchTerm] = useState('');
   const $bottomSheetRef = useRef(null);
@@ -244,41 +244,48 @@ function App() {
     getStores();
   }, []);
 
-  useEffect(() => {
+  const handleFilter = (category, search) => {
     let result = stores;
     
     // 카테고리 필터링
-    if (selectedCategory !== '전체') {
-      result = result.filter(store => store.category === selectedCategory);
+    if (category !== '전체') {
+      result = result.filter(store => store.category === category);
     }
     
     // 검색어 필터링
-    if (searchTerm) {
+    if (search) {
       result = result.filter(store => 
-        store.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        store.address.toLowerCase().includes(searchTerm.toLowerCase())
+        store.name.toLowerCase().includes(search.toLowerCase()) ||
+        store.address.toLowerCase().includes(search.toLowerCase())
       );
     }
     
     setFilteredStores(result);
-  }, [stores, selectedCategory, searchTerm]);
+  };
+
+  const handleSearchChange = (value) => {
+    setSearchTerm(value);
+    handleFilter(selectedCategory, value);
+  };
+
+  const handleCategoryChange = (category) => {
+    setSelectedCategory(category);
+    handleFilter(category, searchTerm);
+  };
 
   return (
     <AppContainer>
       <MapSection>
         <SearchBarContainer>
-          <SearchBar onSearchChange={setSearchTerm} />
+          <SearchBar onSearchChange={handleSearchChange} />
         </SearchBarContainer>
-        <KakaoMap 
-          stores={stores} 
-          selectedCategory={selectedCategory} 
-        />
+        <KakaoMap stores={filteredStores} />
       </MapSection>
       <StoreListContainer ref={$bottomSheetRef} >
         <DragHandle onTouchStart={handleDragStart} onMouseDown={handleDragStart} />
         <StoreFilter 
           categories={categories}
-          onCategoryChange={setSelectedCategory}
+          onCategoryChange={handleCategoryChange}
         />
         <StoreListHeader onTouchStart={handleDragStart} onMouseDown={handleDragStart}>
           <StoreCount>가맹점 {filteredStores.length}개</StoreCount>

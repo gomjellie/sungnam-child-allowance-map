@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { Map, MapMarker, MarkerClusterer, CustomOverlayMap } from 'react-kakao-maps-sdk';
 import styled from 'styled-components';
 
@@ -68,9 +68,8 @@ const InfoTel = styled.p`
   }
 `;
 
-const KakaoMap = ({ stores, selectedCategory }) => {
+const KakaoMap = ({ stores }) => {
   const [map, setMap] = useState(null);
-  const [filteredStores, setFilteredStores] = useState([]);
   const [selectedStore, setSelectedStore] = useState(null);
 
   // 성남시 중심 좌표 (대략적인 위치)
@@ -78,16 +77,6 @@ const KakaoMap = ({ stores, selectedCategory }) => {
     lat: 37.4449168,
     lng: 127.1388684,
   };
-
-  useEffect(() => {
-    if (stores && stores.length > 0) {
-      if (selectedCategory === '전체') {
-        setFilteredStores(stores);
-      } else {
-        setFilteredStores(stores.filter(store => store.category === selectedCategory));
-      }
-    }
-  }, [stores, selectedCategory]);
 
   return (
     <MapContainer>
@@ -103,9 +92,8 @@ const KakaoMap = ({ stores, selectedCategory }) => {
             averageCenter={true}
             minLevel={5}
           >
-            {filteredStores.map((store, index) => (
+            {stores.map((store) => (
               <MapMarker
-                key={`${store.name}-${index}`}
                 position={{ lat: store.lat, lng: store.lng }}
                 title={store.name}
                 onClick={() => {

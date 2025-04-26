@@ -15,7 +15,7 @@ const API_BASE_URL = 'https://example.com/api';
  *
  * @returns {Promise<Array>} 가맹점 데이터 배열
  */
-export const fetchStores = async () => {
+export const fetchStores = () => {
   try {
     // 실제 API 호출 코드 (현재는 주석 처리)
     // const response = await axios.get(`${API_BASE_URL}/stores`, {
@@ -51,9 +51,9 @@ export const fetchStores = async () => {
  * @param {string} category - 가맹점 카테고리
  * @returns {Promise<Array>} 필터링된 가맹점 데이터 배열
  */
-export const fetchStoresByCategory = async (category) => {
+export const fetchStoresByCategory = (category) => {
   try {
-    const stores = await fetchStores();
+    const stores = fetchStores();
     if (category === '전체') return stores;
     return stores.filter((store) => store.category === category);
   } catch (error) {
