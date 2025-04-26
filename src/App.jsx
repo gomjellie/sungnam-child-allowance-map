@@ -33,9 +33,11 @@ const SearchBarContainer = styled.div`
 `;
 
 const Footer = styled.footer`
-  padding: 15px;
+  padding: 8px;
+  height: 24px;
   text-align: center;
-  font-size: 14px;
+  line-height: 1.0;
+  font-size: 12px;
   color: #666;
   background: white;
 `;
@@ -45,7 +47,7 @@ const StoreListContainer = styled.div`
   left: 0;
   right: 0;
   background: white;
-  border-radius: 20px 20px 0 0;
+  border-radius: 16px 16px 0 0;
   box-shadow: 0 -4px 10px rgba(0, 0, 0, 0.1);
   z-index: 100;
   display: flex;
@@ -74,8 +76,7 @@ const DragHandle = styled.div`
 `;
 
 const StoreListHeader = styled.div`
-  padding: 0 20px;
-  margin-bottom: 12px;
+  padding: 16px;
 `;
 
 const StoreCount = styled.h3`
@@ -88,7 +89,7 @@ const StoreCount = styled.h3`
 const StoreListContent = styled.div`
   flex: 1;
   overflow-y: auto;
-  padding: 0 20px 20px;
+  padding: 0 16px 16px;
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
   gap: 15px;
@@ -290,10 +291,10 @@ function App() {
               <StoreInfo>{store.address}</StoreInfo>
             </StoreCard>
           ))}
-        </StoreListContent>
         <Footer>
-          © 2025 성남시 아동수당 가맹점 지도 | 데이터 출처: 신한카드
+          © 2025 성남시 아동수당 가맹점 지도 | 데이터 출처: <a href='https://www.shinhancard.com/mob/MOBFM204N/MOBFM204R11.shc'>신한카드</a>
         </Footer>
+        </StoreListContent>
       </StoreListContainer>
     </AppContainer>
   )
