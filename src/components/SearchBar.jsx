@@ -7,7 +7,7 @@ const SearchContainer = styled.div`
 `;
 
 const SearchInput = styled.input`
-  padding: 10px 15px 10px 35px;
+  padding: 8px 16px 8px 26px;
   border: none;
   border-radius: 8px;
   font-size: 14px;
@@ -28,7 +28,7 @@ const SearchInput = styled.input`
 
 const SearchIcon = styled.div`
   position: absolute;
-  left: 15px;
+  left: 8px;
   top: 50%;
   transform: translateY(-50%);
   color: #999;
