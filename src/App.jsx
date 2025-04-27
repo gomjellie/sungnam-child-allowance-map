@@ -54,7 +54,7 @@ const StoreListContainer = styled.div`
   flex-direction: column;
   touch-action: none;
   bottom: env(safe-area-inset-bottom);
-  height: 40dvh;
+  height: 45dvh;
   max-height: 90dvh;
 `;
 
@@ -142,12 +142,12 @@ function App() {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedStore, setSelectedStore] = useState(null);
   const $bottomSheetRef = useRef(null);
-  const containerHeightRef = useRef(40);
+  const containerHeightRef = useRef(45);
 
   useEffect(() => {
     const handleViewportResize = () => {
       containerHeightRef.current = Number(
-        $bottomSheetRef.current.style.height.replace('dvh', '') || '40'
+        $bottomSheetRef.current.style.height.replace('dvh', '') || '45'
       );
     };
     window.visualViewport.addEventListener('resize', handleViewportResize);
@@ -156,7 +156,10 @@ function App() {
   }, []);
 
   const handleDragStart = (e) => {
+    const snapPoints = [10, 45, 90];
     const startY = e.type.includes('mouse') ? e.clientY : e.touches[0].clientY;
+    // 아래에서 몇 퍼센트에 위치하는지
+
     const startHeight = containerHeightRef.current;
     const startTime = Date.now();
     const touchPoints = [{ y: startY, time: startTime }];
@@ -185,7 +188,7 @@ function App() {
     const handleDragEnd = () => {
       /** @type {HTMLDivElement} */
       const $bottomSheet = $bottomSheetRef.current;
-      const snapPoints = [10, 40, 90];
+
       const currentHeight = containerHeightRef.current;
 
       // 최근 터치 포인트들의 속도 계산
@@ -207,16 +210,16 @@ function App() {
         // 빠른 속도로 드래그 했을 때
         const direction = avgVelocity > 0 ? -1 : 1; // 위로 드래그하면 -1, 아래로 드래그하면 1
         // find the closest snap point
-        const currentIndex = snapPoints
-          .map((point) => Math.abs(point - currentHeight))
-          .indexOf(
-            Math.min(
-              ...snapPoints.map((point) => Math.abs(point - currentHeight))
-            )
-          );
+
+        const currentIndex = (() => {
+          if (currentHeight < 45) {
+            return 0.5;
+          }
+          return 1.5;
+        })();
         const targetIndex = Math.max(
           0,
-          Math.min(snapPoints.length - 1, currentIndex + direction)
+          Math.min(snapPoints.length - 1, currentIndex + direction * 0.5)
         );
         targetPoint = snapPoints[targetIndex];
       } else {

@@ -160,7 +160,7 @@ const KakaoMap = ({
               cy="12"
               r="10"
               stroke="currentColor"
-              stroke-width="2"
+              strokeWidth="2"
               fill="white"
             />
             <circle cx="12" cy="12" r="4" fill="currentColor" />
@@ -170,7 +170,7 @@ const KakaoMap = ({
               x2="12"
               y2="6"
               stroke="currentColor"
-              stroke-width="2"
+              strokeWidth="2"
             />
             <line
               x1="12"
@@ -178,7 +178,7 @@ const KakaoMap = ({
               x2="12"
               y2="22"
               stroke="currentColor"
-              stroke-width="2"
+              strokeWidth="2"
             />
             <line
               x1="2"
@@ -186,7 +186,7 @@ const KakaoMap = ({
               x2="6"
               y2="12"
               stroke="currentColor"
-              stroke-width="2"
+              strokeWidth="2"
             />
             <line
               x1="18"
@@ -194,7 +194,7 @@ const KakaoMap = ({
               x2="22"
               y2="12"
               stroke="currentColor"
-              stroke-width="2"
+              strokeWidth="2"
             />
           </svg>
         </LocationButton>
