@@ -6,6 +6,16 @@ import {
 } from 'react-kakao-maps-sdk';
 import styled from 'styled-components';
 
+interface Store {
+  id: number;
+  name: string;
+  category: string;
+  address: string;
+  tel?: string;
+  lat: number;
+  lng: number;
+}
+
 const MapContainer = styled.div`
   width: 100%;
   height: 100%;
@@ -101,19 +111,30 @@ const InfoTel = styled.p`
 `;
 import { useState } from 'react';
 
+interface KakaoMapProps {
+  map: kakao.maps.Map | null;
+  onCreateMap: (map: kakao.maps.Map) => void;
+  stores: Store[];
+  selectedStore: Store | null;
+  onSelectStore: (store: Store | null) => void;
+}
+
 const KakaoMap = ({
   map,
   onCreateMap,
   stores,
   selectedStore,
   onSelectStore,
-}) => {
+}: KakaoMapProps) => {
   // 성남시 중심 좌표 (대략적인 위치)
   const defaultCenter = {
     lat: 37.4449168,
     lng: 127.1388684,
   };
-  const [currentPosition, setCurrentPosition] = useState(null);
+  const [currentPosition, setCurrentPosition] = useState<{
+    lat: number;
+    lng: number;
+  } | null>(null);
 
   const handleLocationClick = () => {
     if (!map || !navigator.geolocation) return;

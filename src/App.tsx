@@ -1,10 +1,27 @@
-import { useState, useEffect, useRef, useMemo } from 'react';
+import {
+  useState,
+  useEffect,
+  useRef,
+  useMemo,
+  TouchEvent,
+  MouseEvent,
+} from 'react';
 import styled from 'styled-components';
 import KakaoMap from './components/KakaoMap';
 import StoreFilter from './components/StoreFilter';
 import { fetchStores } from './services/storeService';
 import './App.css';
 import SearchBar from './components/SearchBar';
+
+interface Store {
+  id: number;
+  name: string;
+  category: string;
+  address: string;
+  tel?: string;
+  lat: number;
+  lng: number;
+}
 
 const AppContainer = styled.div`
   width: 100%;
@@ -136,28 +153,35 @@ function App() {
     () => [...new Set(fetchStores().map((store) => store.category))],
     []
   );
-  const [map, setMap] = useState(/** @type {kakao.maps.Map | null} */ (null));
+  const [map, setMap] = useState<kakao.maps.Map | null>(null);
   const [filteredStores, setFilteredStores] = useState(fetchStores);
   const [selectedCategory, setSelectedCategory] = useState('전체');
   const [searchTerm, setSearchTerm] = useState('');
-  const [selectedStore, setSelectedStore] = useState(null);
-  const $bottomSheetRef = useRef(null);
+  const [selectedStore, setSelectedStore] = useState<Store | null>(null);
+  const $bottomSheetRef = useRef<HTMLDivElement | null>(null);
   const containerHeightRef = useRef(45);
 
   useEffect(() => {
     const handleViewportResize = () => {
       containerHeightRef.current = Number(
-        $bottomSheetRef.current.style.height.replace('dvh', '') || '45'
+        ($bottomSheetRef.current &&
+          $bottomSheetRef.current.style.height.replace('dvh', '')) ||
+          '45'
       );
     };
-    window.visualViewport.addEventListener('resize', handleViewportResize);
+    window.visualViewport?.addEventListener('resize', handleViewportResize);
     return () =>
-      window.visualViewport.removeEventListener('resize', handleViewportResize);
+      window.visualViewport?.removeEventListener(
+        'resize',
+        handleViewportResize
+      );
   }, []);
 
-  const handleDragStart = (e) => {
+  const handleDragStart = (e: TouchEvent | MouseEvent) => {
     const snapPoints = [10, 45, 90];
-    const startY = e.type.includes('mouse') ? e.clientY : e.touches[0].clientY;
+    const startY = e.type.includes('mouse')
+      ? (e as MouseEvent).clientY
+      : (e as TouchEvent).touches[0].clientY;
     // 아래에서 몇 퍼센트에 위치하는지
 
     const startHeight = containerHeightRef.current;
@@ -165,18 +189,23 @@ function App() {
     const touchPoints = [{ y: startY, time: startTime }];
     const MAX_POINTS = 5; // 최대 기록할 포인트 수
 
-    const handleDrag = (moveEvent) => {
+    const handleDrag = (
+      moveEvent:
+        | MouseEvent
+        | TouchEvent
+        | globalThis.MouseEvent
+        | globalThis.TouchEvent
+    ) => {
       const currentY = moveEvent.type.includes('mouse')
-        ? moveEvent.clientY
-        : moveEvent.touches[0].clientY;
+        ? (moveEvent as MouseEvent).clientY
+        : (moveEvent as TouchEvent).touches[0].clientY;
       const currentTime = Date.now();
       const deltaY = startY - currentY;
-      const deltaPercent = (deltaY / window.visualViewport.height) * 100;
+      const deltaPercent = (deltaY / window.visualViewport!.height) * 100;
       const newHeight = Math.min(Math.max(startHeight + deltaPercent, 10), 90);
 
-      /** @type {HTMLDivElement} */
       const $bottomSheet = $bottomSheetRef.current;
-      $bottomSheet.style.height = `${newHeight}dvh`;
+      $bottomSheet && ($bottomSheet.style.height = `${newHeight}dvh`);
       containerHeightRef.current = newHeight;
 
       touchPoints.push({ y: currentY, time: currentTime });
@@ -186,7 +215,6 @@ function App() {
     };
 
     const handleDragEnd = () => {
-      /** @type {HTMLDivElement} */
       const $bottomSheet = $bottomSheetRef.current;
 
       const currentHeight = containerHeightRef.current;
@@ -234,13 +262,14 @@ function App() {
       // 속도에 따라 transition 시간 조정
       const transitionDuration =
         Math.abs(avgVelocity) > VELOCITY_THRESHOLD ? 0.2 : 0.3;
+      if (!$bottomSheet) return;
       $bottomSheet.style.transition = `height ${transitionDuration}s ease`;
       $bottomSheet.style.height = `${targetPoint}dvh`;
       containerHeightRef.current = targetPoint;
 
       setTimeout(() => {
         $bottomSheet.style.transition = 'none';
-        map.relayout();
+        map?.relayout();
       }, transitionDuration * 1000);
       document.removeEventListener('mousemove', handleDrag);
       document.removeEventListener('mouseup', handleDragEnd);
@@ -254,7 +283,7 @@ function App() {
     document.addEventListener('touchend', handleDragEnd);
   };
 
-  const handleFilter = (category, search) => {
+  const handleFilter = (category: string, search: string) => {
     let result = stores;
 
     // 카테고리 필터링
@@ -274,12 +303,12 @@ function App() {
     setFilteredStores(result);
   };
 
-  const handleSearchChange = (value) => {
+  const handleSearchChange = (value: string) => {
     setSearchTerm(value);
     handleFilter(selectedCategory, value);
   };
 
-  const handleCategoryChange = (category) => {
+  const handleCategoryChange = (category: string) => {
     handleFilter(category, searchTerm);
     setSelectedCategory(category);
     setSelectedStore(null);

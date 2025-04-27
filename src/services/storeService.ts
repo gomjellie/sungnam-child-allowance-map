@@ -1,9 +1,15 @@
-// 실제 API 엔드포인트로 대체해야 함
-// 예: 성남시 공공데이터 포털 또는 자체 백엔드 서버
-const API_BASE_URL = 'https://example.com/api';
-
 // 환경 변수를 통한 API 키 관리 (보안을 위해 권장)
 // const API_KEY = import.meta.env.VITE_API_KEY;
+
+export interface Store {
+  id: number;
+  name: string;
+  category: string;
+  address: string;
+  tel?: string;
+  lat: number;
+  lng: number;
+}
 
 /**
  * 가맹점 데이터를 가져오는 함수
@@ -13,9 +19,9 @@ const API_BASE_URL = 'https://example.com/api';
  * 2. 아래 주석 처리된 API 호출 코드의 주석을 해제
  * 3. 샘플 데이터 반환 코드를 주석 처리
  *
- * @returns {Promise<Array>} 가맹점 데이터 배열
+ * @returns {Store[]} 가맹점 데이터 배열
  */
-export const fetchStores = () => {
+export const fetchStores = (): Store[] => {
   try {
     // 실제 API 호출 코드 (현재는 주석 처리)
     // const response = await axios.get(`${API_BASE_URL}/stores`, {
@@ -51,7 +57,7 @@ export const fetchStores = () => {
  * @param {string} category - 가맹점 카테고리
  * @returns {Promise<Array>} 필터링된 가맹점 데이터 배열
  */
-export const fetchStoresByCategory = (category) => {
+export const fetchStoresByCategory = (category: string) => {
   try {
     const stores = fetchStores();
     if (category === '전체') return stores;
@@ -66,7 +72,7 @@ export const fetchStoresByCategory = (category) => {
 };
 
 // 샘플 데이터 - 실제 API 연동 전까지 사용
-const sampleStores = [
+const sampleStores: Store[] = [
   {
     id: 1,
     name: '분당 문구점',

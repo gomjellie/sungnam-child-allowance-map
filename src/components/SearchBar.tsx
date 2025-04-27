@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, ChangeEvent } from 'react';
 import styled from 'styled-components';
 
 const SearchContainer = styled.div`
@@ -37,10 +37,14 @@ const SearchIcon = styled.div`
   justify-content: center;
 `;
 
-const SearchBar = ({ onSearchChange }) => {
+const SearchBar = ({
+  onSearchChange,
+}: {
+  onSearchChange: (value: string) => void;
+}) => {
   const [searchValue, setSearchValue] = useState('');
 
-  const handleSearchChange = (e) => {
+  const handleSearchChange = (e: ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     setSearchValue(value);
     onSearchChange(value);

@@ -10,17 +10,6 @@ const FilterContainer = styled.div`
   padding: 0 16px;
 `;
 
-const Title = styled.h2`
-  margin: 0;
-  color: #333;
-  backdrop-filter: blur(2px);
-  width: fit-content;
-  font-size: 1.1rem;
-  font-weight: 500;
-  display: flex;
-  align-items: center;
-`;
-
 const FilterSection = styled.div`
   display: flex;
   flex-direction: column;
@@ -43,7 +32,7 @@ const CategoryContainer = styled.div`
   }
 `;
 
-const CategoryButton = styled.button`
+const CategoryButton = styled.button<{ active: boolean }>`
   padding: 6px 12px;
   border: none;
   border-radius: 16px;
@@ -60,46 +49,16 @@ const CategoryButton = styled.button`
   }
 `;
 
-const SearchContainer = styled.div`
-  position: relative;
-  width: 100%;
-`;
-
-const SearchInput = styled.input`
-  padding: 10px 15px 10px 35px;
-  border: none;
-  border-radius: 8px;
-  font-size: 14px;
-  width: 100%;
-  background-color: #f5f7fa;
-  transition: all 0.2s ease;
-
-  &:focus {
-    outline: none;
-    background-color: white;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  }
-
-  &::placeholder {
-    color: #999;
-  }
-`;
-
-const SearchIcon = styled.div`
-  position: absolute;
-  left: 15px;
-  top: 50%;
-  transform: translateY(-50%);
-  color: #999;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-`;
-
-const StoreFilter = ({ categories, onCategoryChange }) => {
+const StoreFilter = ({
+  categories,
+  onCategoryChange,
+}: {
+  categories: string[];
+  onCategoryChange: (category: string) => void;
+}) => {
   const [activeCategory, setActiveCategory] = useState('전체');
 
-  const handleCategoryClick = (category) => {
+  const handleCategoryClick = (category: string) => {
     setActiveCategory(category);
     onCategoryChange(category);
   };
