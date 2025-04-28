@@ -1,4 +1,4 @@
-import puppeteer, { Browser, Page } from 'puppeteer';
+import puppeteer, { Browser, KnownDevices, Page } from 'puppeteer';
 import { promises as fs } from 'fs';
 import path from 'path';
 
@@ -34,6 +34,7 @@ export class Crawler {
   }
 
   async init(): Promise<void> {
+    const device = KnownDevices['iPhone 15 Pro Max'];
     this.browser = await puppeteer.launch({
       browser: 'chrome',
       headless: false,
@@ -42,6 +43,12 @@ export class Crawler {
       args: ['--no-sandbox', '--disable-dev-shm-usage'],
     });
     this.page = await this.browser.newPage();
+    this.page.emulate(device);
+    await this.page.setViewport({
+      width: device.viewport.width,
+      height: device.viewport.height,
+      deviceScaleFactor: device.viewport.deviceScaleFactor,
+    });
     await this.page.goto(
       'https://www.shinhancard.com/mob/MOBFM204N/MOBFM204R11.shc'
     );
@@ -87,25 +94,32 @@ export class Crawler {
       await categoryElement.evaluate((b) => (b as any).click());
 
       // 검색 버튼 클릭
-      // await this.page.click(
-      //   '#contents > div > div.ly_inner.expend_wrap.bg_gray.gap60_40 > div > div:nth-child(3) > div.input_wrap.side_btn > button'
-      // );
       await this.page.click(
         "xpath/.//button[@class='btn line_darkgray'][./span[text()='검색']]"
       );
       await this.waitForLoadingLayerToDisappear();
-      // await this.page.waitForTimeout(2000);
+      await this.page.waitForNetworkIdle();
 
+      // 더보기가 더이상 나오지 않을때까지 클릭
       while (true) {
         // 다음 페이지 확인
-        const nextButton = await this.page.$(
-          'xpath/.//*[@id="btnMore"]/button'
+        const btnMoreDiv = await this.page.$('#btnMore');
+        if (!btnMoreDiv) break;
+
+        const isHidden = await btnMoreDiv.evaluate(
+          (el) => window.getComputedStyle(el).display === 'none'
         );
+        if (isHidden) break;
+
+        const nextButton = await btnMoreDiv.$('button');
         if (!nextButton) break;
 
+        await nextButton.focus();
         await nextButton.scrollIntoView();
+        await this.page.waitForNetworkIdle();
         await nextButton.evaluate((b) => (b as any).click());
         await this.waitForLoadingLayerToDisappear();
+        await this.page.waitForNetworkIdle();
       }
       // 검색 결과 확인
 
