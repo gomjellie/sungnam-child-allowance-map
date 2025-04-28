@@ -7,8 +7,8 @@ interface Merchant {
   category: string;
   address: string;
   tel: string;
-  latitude: string;
-  longitude: string;
+  lat: string;
+  lng: string;
   kakao_map_url?: string;
   naver_map_url?: string;
 }
@@ -48,6 +48,7 @@ export class Crawler {
       width: device.viewport.width,
       height: device.viewport.height,
       deviceScaleFactor: device.viewport.deviceScaleFactor,
+      isMobile: true,
     });
     await this.page.goto(
       'https://www.shinhancard.com/mob/MOBFM204N/MOBFM204R11.shc'
@@ -157,8 +158,8 @@ export class Crawler {
             category,
             address,
             tel,
-            latitude: '',
-            longitude: '',
+            lat: '',
+            lng: '',
           };
         })
       );
@@ -179,15 +180,15 @@ export class Crawler {
   async enrichWithCoordinates(merchants: Merchant[]): Promise<Merchant[]> {
     return merchants.map((merchant) => {
       // 테스트용 더미 데이터
-      const latitude = (37.3 + Math.random() * 0.2).toString();
-      const longitude = (127.0 + Math.random() * 0.2).toString();
+      const lat = (37.3 + Math.random() * 0.2).toString();
+      const lng = (127.0 + Math.random() * 0.2).toString();
 
       return {
         ...merchant,
-        latitude,
-        longitude,
-        kakao_map_url: `https://map.kakao.com/link/map/${merchant.name},${latitude},${longitude}`,
-        naver_map_url: `https://map.naver.com/v5/search/${merchant.name}?c=${longitude},${latitude},15,0,0,0,dh`,
+        lat,
+        lng,
+        kakao_map_url: `https://map.kakao.com/link/map/${merchant.name},${lat},${lng}`,
+        naver_map_url: `https://map.naver.com/v5/search/${merchant.name}?c=${lng},${lat},15,0,0,0,dh`,
       };
     });
   }
