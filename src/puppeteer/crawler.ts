@@ -6,11 +6,7 @@ interface Merchant {
   name: string;
   category: string;
   address: string;
-  tel: string;
-  lat: string;
-  lng: string;
   kakao_map_url?: string;
-  naver_map_url?: string;
 }
 
 export class Crawler {
@@ -147,8 +143,6 @@ export class Crawler {
             'span.address',
             (el) => el.textContent || ''
           );
-          // tel 필드가 HTML에 없는 것 같아 빈 문자열로 설정
-          const tel = '';
 
           // console.log({ name, type, address });
 
@@ -157,9 +151,6 @@ export class Crawler {
             type,
             category,
             address,
-            tel,
-            lat: '',
-            lng: '',
           };
         })
       );
@@ -175,22 +166,6 @@ export class Crawler {
     }
 
     return merchants;
-  }
-
-  async enrichWithCoordinates(merchants: Merchant[]): Promise<Merchant[]> {
-    return merchants.map((merchant) => {
-      // 테스트용 더미 데이터
-      const lat = (37.3 + Math.random() * 0.2).toString();
-      const lng = (127.0 + Math.random() * 0.2).toString();
-
-      return {
-        ...merchant,
-        lat,
-        lng,
-        kakao_map_url: `https://map.kakao.com/link/map/${merchant.name},${lat},${lng}`,
-        naver_map_url: `https://map.naver.com/v5/search/${merchant.name}?c=${lng},${lat},15,0,0,0,dh`,
-      };
-    });
   }
 
   async close(): Promise<void> {
@@ -224,9 +199,7 @@ async function run() {
         `${category} 카테고리에서 ${merchants.length}개의 가맹점 정보를 수집했습니다.`
       );
 
-      // 좌표 정보 추가
-      const enrichedMerchants = await crawler.enrichWithCoordinates(merchants);
-      allMerchants = allMerchants.concat(enrichedMerchants);
+      allMerchants = allMerchants.concat(merchants);
     }
 
     console.log('\n전체 수집 결과:');
