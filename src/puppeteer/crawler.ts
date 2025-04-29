@@ -13,22 +13,6 @@ export class Crawler {
   private browser: Browser | null = null;
   private page: Page | null = null;
 
-  private async waitForLoadingLayerToDisappear(): Promise<void> {
-    if (!this.page) throw new Error('Browser not initialized');
-    try {
-      const layer = await this.page.waitForSelector('#loadingLayer', {
-        timeout: 2000,
-      });
-      if (!layer) return;
-      await this.page.waitForFunction(
-        () => !document.querySelector('#loadingLayer'),
-        { timeout: 10000 }
-      );
-    } catch (error) {
-      console.warn('로딩 레이어 대기 중 타임아웃이 발생했습니다.');
-    }
-  }
-
   async init(): Promise<void> {
     const device = KnownDevices['iPhone 15 Pro Max'];
     this.browser = await puppeteer.launch({
@@ -91,10 +75,9 @@ export class Crawler {
       await categoryElement.evaluate((b) => (b as any).click());
 
       // 검색 버튼 클릭
-      await this.page.click(
+      this.page.click(
         "xpath/.//button[@class='btn line_darkgray'][./span[text()='검색']]"
       );
-      await this.waitForLoadingLayerToDisappear();
       await this.page.waitForNetworkIdle();
 
       // 더보기가 더이상 나오지 않을때까지 클릭
@@ -113,9 +96,7 @@ export class Crawler {
 
         await nextButton.focus();
         await nextButton.scrollIntoView();
-        await this.page.waitForNetworkIdle();
-        await nextButton.evaluate((b) => (b as any).click());
-        await this.waitForLoadingLayerToDisappear();
+        nextButton.evaluate((b) => (b as any).click());
         await this.page.waitForNetworkIdle();
       }
       // 검색 결과 확인
