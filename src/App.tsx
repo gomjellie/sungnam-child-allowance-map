@@ -346,10 +346,7 @@ function App() {
       // https://github.com/JaeSeoKim/react-kakao-maps-sdk/issues/77
       const little = 0.000001;
       // 지도를 살짝 이동시켜 마커 업데이트를 트리거
-      map.panBy(-little, -little);
-      setTimeout(() => {
-        map.panBy(little, little);
-      }, 500);
+      map.panBy(0, -little);
     }
   };
 
