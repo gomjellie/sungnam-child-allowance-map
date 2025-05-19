@@ -1,4 +1,5 @@
 import styled from 'styled-components';
+import { Store } from '../services/storeService';
 
 const FilterContainer = styled.div`
   z-index: 10;
@@ -49,10 +50,12 @@ const CategoryButton = styled.button<{ active: boolean }>`
 `;
 
 const StoreFilter = ({
+  storesInBound,
   selectedCategory,
   categories,
   onCategoryChange,
 }: {
+  storesInBound: Store[];
   selectedCategory: string;
   categories: string[];
   onCategoryChange: (category: string) => void;
@@ -60,6 +63,8 @@ const StoreFilter = ({
   const handleCategoryClick = (category: string) => {
     onCategoryChange(category);
   };
+
+  const categoriesInStores = storesInBound.map((store) => store.category);
 
   return (
     <FilterContainer>
@@ -72,16 +77,30 @@ const StoreFilter = ({
           >
             전체
           </CategoryButton>
-          {categories.map((category) => (
-            <CategoryButton
-              key={category}
-              active={selectedCategory === category}
-              onClick={() => handleCategoryClick(category)}
-              title={category}
-            >
-              {category}
-            </CategoryButton>
-          ))}
+          {categories
+            .filter((category) => categoriesInStores.includes(category))
+            .sort((a, b) => {
+              return (
+                storesInBound.filter((store) => store.category === b).length -
+                storesInBound.filter((store) => store.category === a).length
+              );
+            })
+            .map((category) => (
+              <CategoryButton
+                key={category}
+                active={selectedCategory === category}
+                onClick={() => handleCategoryClick(category)}
+                title={category}
+              >
+                {(() => {
+                  const count = storesInBound.filter(
+                    (store) => store.category === category
+                  ).length;
+                  return `${category}(${count})`;
+                })()}
+                {/* {category}({filteredStores.filter((store) => store.category === category).length > 0 && filteredStores.filter((store) => store.category === category).length}) */}
+              </CategoryButton>
+            ))}
         </CategoryContainer>
       </FilterSection>
     </FilterContainer>

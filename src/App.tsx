@@ -10,6 +10,7 @@ import styled from 'styled-components';
 import KakaoMap from './components/KakaoMap';
 import StoreFilter from './components/StoreFilter';
 import { fetchStores } from './services/storeService';
+import { chain } from 'lodash-es';
 import './App.css';
 import SearchBar from './components/SearchBar';
 
@@ -289,27 +290,25 @@ function App() {
 
     const bounds = new kakao.maps.LatLngBounds(sw, ne);
 
-    function* take(n: number, iter: Iterable<any>) {
-      for (const v of iter) {
-        if (n <= 0) return;
-        yield v;
-        n--;
-      }
-    }
-    // 제너레이터 함수를 사용하여 lazy 계산 구현
-    function* filterStoresInBounds() {
-      for (const store of stores) {
-        const latlng = new kakao.maps.LatLng(store.lat, store.lng);
-        if (bounds.contain(latlng)) {
-          yield store;
-        }
-      }
-    }
-
     // 제너레이터에서 결과 수집
-    const filtered = Array.from(take(299, filterStoresInBounds()));
+    const filtered = chain(stores)
+      .filter((store) =>
+        bounds.contain(new kakao.maps.LatLng(store.lat, store.lng))
+      )
+      .sort((a, b) => {
+        const centerLat = sw.getLat() + (ne.getLat() - sw.getLat()) / 2;
+        const centerLng = sw.getLng() + (ne.getLng() - sw.getLng()) / 2;
 
-    setStoresInBound(filtered);
+        // 거리 계산
+        const aDistance =
+          Math.pow(centerLat - a.lat, 2) + Math.pow(centerLng - a.lng, 2);
+        const bDistance =
+          Math.pow(centerLat - b.lat, 2) + Math.pow(centerLng - b.lng, 2);
+        return aDistance - bDistance;
+      })
+      .take(999)
+      .value();
+    setStoresInBound(filtered ?? []);
     handleFilter(selectedCategory, searchTerm, filtered);
   };
 
@@ -330,7 +329,7 @@ function App() {
       );
     }
 
-    setFilteredStores(result);
+    setFilteredStores(result ?? []);
   };
 
   const handleSearchChange = (value: string) => {
@@ -371,6 +370,7 @@ function App() {
           onMouseDown={handleDragStart}
         />
         <StoreFilter
+          storesInBound={storesInBound}
           selectedCategory={selectedCategory}
           categories={categories}
           onCategoryChange={handleCategoryChange}
@@ -381,7 +381,7 @@ function App() {
         >
           <StoreCount>
             가맹점 {filteredStores.length}개
-            {filteredStores.length === 299 ? '+' : ''}
+            {filteredStores.length === 999 ? '+' : ''}
           </StoreCount>
         </StoreListHeader>
         <StoreListContent>
