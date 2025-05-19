@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import styled from 'styled-components';
 
 const FilterContainer = styled.div`
@@ -50,16 +49,15 @@ const CategoryButton = styled.button<{ active: boolean }>`
 `;
 
 const StoreFilter = ({
+  selectedCategory,
   categories,
   onCategoryChange,
 }: {
+  selectedCategory: string;
   categories: string[];
   onCategoryChange: (category: string) => void;
 }) => {
-  const [activeCategory, setActiveCategory] = useState('전체');
-
   const handleCategoryClick = (category: string) => {
-    setActiveCategory(category);
     onCategoryChange(category);
   };
 
@@ -69,7 +67,7 @@ const StoreFilter = ({
         <SectionTitle>카테고리</SectionTitle>
         <CategoryContainer>
           <CategoryButton
-            active={activeCategory === '전체'}
+            active={selectedCategory === '전체'}
             onClick={() => handleCategoryClick('전체')}
           >
             전체
@@ -77,7 +75,7 @@ const StoreFilter = ({
           {categories.map((category) => (
             <CategoryButton
               key={category}
-              active={activeCategory === category}
+              active={selectedCategory === category}
               onClick={() => handleCategoryClick(category)}
               title={category}
             >

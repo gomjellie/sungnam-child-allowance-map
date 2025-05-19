@@ -7,11 +7,10 @@ import {
 import styled from 'styled-components';
 
 interface Store {
-  id: number;
   name: string;
+  type: string;
   category: string;
   address: string;
-  tel?: string;
   lat: number;
   lng: number;
 }
@@ -98,23 +97,13 @@ const InfoAddress = styled.p`
   color: #666;
 `;
 
-const InfoTel = styled.p`
-  margin: 0;
-  font-size: 14px;
-  color: #666;
-  display: flex;
-  align-items: center;
-
-  svg {
-    margin-right: 5px;
-  }
-`;
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 interface KakaoMapProps {
   map: kakao.maps.Map | null;
   onCreateMap: (map: kakao.maps.Map) => void;
   stores: Store[];
+  onBoundChange: (edges: kakao.maps.LatLngBounds) => void;
   selectedStore: Store | null;
   onSelectStore: (store: Store | null) => void;
 }
@@ -125,6 +114,7 @@ const KakaoMap = ({
   stores,
   selectedStore,
   onSelectStore,
+  onBoundChange,
 }: KakaoMapProps) => {
   // 성남시 중심 좌표 (대략적인 위치)
   const defaultCenter = {
@@ -136,31 +126,56 @@ const KakaoMap = ({
     lng: number;
   } | null>(null);
 
-  const handleLocationClick = () => {
-    if (!map || !navigator.geolocation) return;
-    navigator.geolocation.getCurrentPosition(
-      (position) => {
-        const moveLatLng = new window.kakao.maps.LatLng(
-          position.coords.latitude,
-          position.coords.longitude
-        );
-        setCurrentPosition({
-          lat: position.coords.latitude,
-          lng: position.coords.longitude,
-        });
-        map.panTo(moveLatLng);
-      },
-      (error) => {
-        console.error('위치 정보를 가져오는데 실패했습니다:', error);
-        alert('위치 정보를 가져오는데 실패했습니다.');
-      },
-      {
-        enableHighAccuracy: true,
-        timeout: 5000,
-        maximumAge: 0,
-      }
-    );
+  // Promise로 래핑된 getCurrentPosition 함수
+  const getCurrentPositionAsync = (): Promise<GeolocationPosition> => {
+    return new Promise((resolve, reject) => {
+      navigator.geolocation.getCurrentPosition(
+        (position) => resolve(position),
+        (error) => reject(error),
+        {
+          enableHighAccuracy: true,
+          timeout: 5000,
+          maximumAge: 0,
+        }
+      );
+    });
   };
+
+  const makeMeAtCenter = async () => {
+    if (!map) return;
+
+    try {
+      const position = await getCurrentPositionAsync();
+      const moveLatLng = new window.kakao.maps.LatLng(
+        position.coords.latitude,
+        position.coords.longitude
+      );
+      setCurrentPosition({
+        lat: position.coords.latitude,
+        lng: position.coords.longitude,
+      });
+      map.panTo(moveLatLng);
+    } catch (error) {
+      console.error('위치 정보를 가져오는데 실패했습니다:', error);
+      alert('위치 정보를 가져오는데 실패했습니다.');
+      // 실패 시 기본 위치로 이동
+      map.panTo(
+        new window.kakao.maps.LatLng(defaultCenter.lat, defaultCenter.lng)
+      );
+    }
+  };
+
+  const handleLocationClick = async () => {
+    if (!map || !navigator.geolocation) return;
+
+    makeMeAtCenter();
+  };
+
+  useEffect(() => {
+    if (!map) return;
+    // 현재 위치를 가져와서 지도 중심으로 설정
+    makeMeAtCenter();
+  }, [map]); // map이 변경될 때마다 실행
 
   return (
     <MapContainer>
@@ -170,7 +185,9 @@ const KakaoMap = ({
         level={5} // 지도 확대 레벨
         onCreate={(map) => {
           onCreateMap(map);
-          // map.panTo(1,)
+        }}
+        onIdle={(target) => {
+          onBoundChange(target.getBounds());
         }}
         onClick={() => void onSelectStore(null)}
       >
@@ -261,23 +278,6 @@ const KakaoMap = ({
               <InfoTitle>{selectedStore.name}</InfoTitle>
               <InfoCategory>{selectedStore.category}</InfoCategory>
               <InfoAddress>{selectedStore.address}</InfoAddress>
-              {selectedStore.tel && (
-                <InfoTel>
-                  <svg
-                    width="12"
-                    height="12"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <path
-                      d="M6.62 10.79C8.06 13.62 10.38 15.94 13.21 17.38L15.41 15.18C15.69 14.9 16.08 14.82 16.43 14.93C17.55 15.3 18.75 15.5 20 15.5C20.55 15.5 21 15.95 21 16.5V20C21 20.55 20.55 21 20 21C10.61 21 3 13.39 3 4C3 3.45 3.45 3 4 3H7.5C8.05 3 8.5 3.45 8.5 4C8.5 5.25 8.7 6.45 9.07 7.57C9.18 7.92 9.1 8.31 8.82 8.59L6.62 10.79Z"
-                      fill="currentColor"
-                    />
-                  </svg>
-                  {selectedStore.tel}
-                </InfoTel>
-              )}
               <button
                 style={{
                   position: 'absolute',

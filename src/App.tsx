@@ -14,11 +14,10 @@ import './App.css';
 import SearchBar from './components/SearchBar';
 
 interface Store {
-  id: number;
   name: string;
+  type: string;
   category: string;
   address: string;
-  tel?: string;
   lat: number;
   lng: number;
 }
@@ -154,7 +153,8 @@ function App() {
     []
   );
   const [map, setMap] = useState<kakao.maps.Map | null>(null);
-  const [filteredStores, setFilteredStores] = useState(fetchStores);
+  const [storesInBound, setStoresInBound] = useState<Store[]>([]);
+  const [filteredStores, setFilteredStores] = useState<Store[]>([]);
   const [selectedCategory, setSelectedCategory] = useState('전체');
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedStore, setSelectedStore] = useState<Store | null>(null);
@@ -283,8 +283,38 @@ function App() {
     document.addEventListener('touchend', handleDragEnd);
   };
 
-  const handleFilter = (category: string, search: string) => {
-    let result = stores;
+  const handleBoundChange = (edges: kakao.maps.LatLngBounds) => {
+    const sw = edges.getSouthWest();
+    const ne = edges.getNorthEast();
+
+    const bounds = new kakao.maps.LatLngBounds(sw, ne);
+
+    function* take(n: number, iter: Iterable<any>) {
+      for (const v of iter) {
+        if (n <= 0) return;
+        yield v;
+        n--;
+      }
+    }
+    // 제너레이터 함수를 사용하여 lazy 계산 구현
+    function* filterStoresInBounds() {
+      for (const store of stores) {
+        const latlng = new kakao.maps.LatLng(store.lat, store.lng);
+        if (bounds.contain(latlng)) {
+          yield store;
+        }
+      }
+    }
+
+    // 제너레이터에서 결과 수집
+    const filtered = Array.from(take(299, filterStoresInBounds()));
+
+    setStoresInBound(filtered);
+    handleFilter(selectedCategory, searchTerm, filtered);
+  };
+
+  const handleFilter = (category: string, search: string, stores?: Store[]) => {
+    let result = stores ?? storesInBound;
 
     // 카테고리 필터링
     if (category !== '전체') {
@@ -332,6 +362,7 @@ function App() {
         <KakaoMap
           map={map}
           onCreateMap={setMap}
+          onBoundChange={handleBoundChange}
           stores={filteredStores}
           selectedStore={selectedStore}
           onSelectStore={setSelectedStore}
@@ -343,6 +374,7 @@ function App() {
           onMouseDown={handleDragStart}
         />
         <StoreFilter
+          selectedCategory={selectedCategory}
           categories={categories}
           onCategoryChange={handleCategoryChange}
         />
@@ -350,12 +382,15 @@ function App() {
           onTouchStart={handleDragStart}
           onMouseDown={handleDragStart}
         >
-          <StoreCount>가맹점 {filteredStores.length}개</StoreCount>
+          <StoreCount>
+            가맹점 {filteredStores.length}개
+            {filteredStores.length === 299 ? '+' : ''}
+          </StoreCount>
         </StoreListHeader>
         <StoreListContent>
           {filteredStores.map((store) => (
             <StoreCard
-              key={store.id}
+              key={`${store.name}-${store.lat}-${store.lng}`}
               onClick={() => {
                 setSelectedStore(store);
                 if (map) {

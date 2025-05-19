@@ -62,7 +62,7 @@ export const run = async (): Promise<Store[]> => {
 
     // 가맹점 데이터 업데이트
     console.log('가맹점 데이터 업데이트를 시작합니다...');
-    const enrichedStores = await enrichStoresData(stores.slice(500, 520));
+    const enrichedStores = await enrichStoresData(stores);
     console.log(
       `총 ${enrichedStores.length}개의 가맹점 데이터가 업데이트되었습니다.`
     );
@@ -81,7 +81,9 @@ export const run = async (): Promise<Store[]> => {
       JSON.stringify(enrichedStores, null, 2),
       'utf8'
     );
-    console.log('업데이트된 데이터가 merchants.json 파일에 저장되었습니다.');
+    console.log(
+      '업데이트된 데이터가 enrichedMerchants.json 파일에 저장되었습니다.'
+    );
 
     return enrichedStores;
   } catch (error) {
@@ -110,8 +112,6 @@ export const enrichStoresData = async (stores: Store[]): Promise<Store[]> => {
     console.error('가맹점 데이터 처리 중 오류가 발생했습니다:', error);
     return stores.map((store) => ({
       ...store,
-      kakao_map_url: '',
-      naver_map_url: '',
     }));
   }
 };
