@@ -7,7 +7,7 @@ const SearchContainer = styled.div`
 `;
 
 const SearchInput = styled.input`
-  padding: 8px 16px 8px 26px;
+  padding: 8px 36px 8px 26px; /* 오른쪽 패딩 수정 */
   border: none;
   border-radius: 8px;
   font-size: 14px;
@@ -24,6 +24,7 @@ const SearchInput = styled.input`
   &::placeholder {
     color: #999;
   }
+  color: black;  
 `;
 
 const SearchIcon = styled.div`
@@ -37,6 +38,25 @@ const SearchIcon = styled.div`
   justify-content: center;
 `;
 
+const ClearButton = styled.button`
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: #999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+
+  &:hover {
+    color: #333;
+  }
+`;
+
 const SearchBar = ({
   onSearchChange,
 }: {
@@ -48,6 +68,11 @@ const SearchBar = ({
     const value = e.target.value;
     setSearchValue(value);
     onSearchChange(value);
+  };
+
+  const handleClearSearch = () => {
+    setSearchValue('');
+    onSearchChange('');
   };
 
   return (
@@ -72,6 +97,22 @@ const SearchBar = ({
         value={searchValue}
         onChange={handleSearchChange}
       />
+      {searchValue && (
+        <ClearButton onClick={handleClearSearch} aria-label="검색어 지우기">
+          <svg
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M19 6.41L17.59 5L12 10.59L6.41 5L5 6.41L10.59 12L5 17.59L6.41 19L12 13.41L17.59 19L19 17.59L13.41 12L19 6.41Z"
+              fill="currentColor"
+            />
+          </svg>
+        </ClearButton>
+      )}
     </SearchContainer>
   );
 };

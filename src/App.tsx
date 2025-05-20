@@ -10,7 +10,7 @@ import styled from 'styled-components';
 import KakaoMap from './components/KakaoMap';
 import StoreFilter from './components/StoreFilter';
 import { fetchStores } from './services/storeService';
-import { chain } from 'lodash-es';
+import { chain, debounce } from 'lodash-es';
 import './App.css';
 import SearchBar from './components/SearchBar';
 
@@ -337,10 +337,11 @@ function App() {
     setFilteredStores(uniqueResult ?? []);
   };
 
-  const handleSearchChange = (value: string) => {
+  const _handleSearchChange = (value: string) => {
     setSearchTerm(value);
     handleFilter(selectedCategory, value);
   };
+  const handleSearchChange = debounce(_handleSearchChange, 300);
 
   const handleCategoryChange = (category: string) => {
     handleFilter(category, searchTerm);
