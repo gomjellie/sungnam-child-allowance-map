@@ -128,7 +128,7 @@ const StoreCard = styled.div`
 `;
 
 const StoreName = styled.h3`
-  margin: 0 0 10px 0;
+  margin: 0 8px 0 0;
   color: #333;
 `;
 
@@ -415,8 +415,10 @@ function App() {
               }}
               style={{ cursor: 'pointer' }}
             >
-              <StoreName>{store.name}</StoreName>
-              <StoreCategory>{store.category}</StoreCategory>
+              <div style={{ display: 'flex', alignItems: 'center' }}>
+                <StoreName>{store.name}</StoreName>
+                <StoreCategory>{store.category}</StoreCategory>
+              </div>
               <StoreInfo>{store.address}</StoreInfo>
             </StoreCard>
           ))}
