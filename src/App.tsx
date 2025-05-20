@@ -312,8 +312,12 @@ function App() {
     handleFilter(selectedCategory, searchTerm, filtered);
   };
 
-  const handleFilter = (category: string, search: string, stores?: Store[]) => {
-    let result = stores ?? storesInBound;
+  const handleFilter = (
+    category: string,
+    search: string,
+    sourceStores?: Store[]
+  ) => {
+    let result = sourceStores ?? (search ? stores : storesInBound);
 
     // 카테고리 필터링
     if (category !== '전체') {
@@ -322,14 +326,15 @@ function App() {
 
     // 검색어 필터링
     if (search) {
-      result = result.filter(
-        (store) =>
-          store.name.toLowerCase().includes(search.toLowerCase()) ||
-          store.address.toLowerCase().includes(search.toLowerCase())
+      result = result.filter((store) =>
+        store.name.toLowerCase().includes(search.toLowerCase())
       );
     }
 
-    setFilteredStores(result ?? []);
+    // 중복 제거
+    const uniqueResult = chain(result).uniqBy('name').value();
+
+    setFilteredStores(uniqueResult ?? []);
   };
 
   const handleSearchChange = (value: string) => {
