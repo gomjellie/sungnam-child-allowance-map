@@ -1,9 +1,4 @@
-import {
-  Map,
-  MapMarker,
-  MarkerClusterer,
-  CustomOverlayMap,
-} from 'react-kakao-maps-sdk';
+import { Map, MapMarker, CustomOverlayMap } from 'react-kakao-maps-sdk';
 import styled from 'styled-components';
 
 interface Store {
@@ -51,13 +46,18 @@ const LocationButton = styled.button`
 `;
 
 const InfoWindow = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
   cursor: text;
-  padding: 15px;
+  padding: 8px;
   background-color: white;
   border-radius: 8px;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
-  min-width: 220px;
+  width: 220px;
   position: absolute;
+  overflow-y: scroll;
+  max-height: 300px;
   bottom: 50px;
   left: 50%;
   transform: translateX(-50%);
@@ -75,11 +75,23 @@ const InfoWindow = styled.div`
   }
 `;
 
+const InfoItem = styled.div`
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+
+  &:not(:last-child) {
+    border-bottom: 1px solid #e0e0e0; // 하단 경계선은 마지막 항목이 아닌 경우에만 표시
+  }
+  padding-bottom: 4px;
+`;
+
 const InfoTitle = styled.h3`
-  margin: 0 0 8px 0;
+  margin: 0;
   font-size: 16px;
   font-weight: 600;
   color: #333;
+  margin-right: 8px;
 `;
 
 const InfoCategory = styled.span`
@@ -88,23 +100,29 @@ const InfoCategory = styled.span`
   padding: 3px 6px;
   border-radius: 4px;
   font-size: 12px;
-  margin-bottom: 8px;
 `;
 
-const InfoAddress = styled.p`
-  margin: 0 0 5px 0;
+const InfoAddress = styled.div`
+  display: -webkit-box;
+  margin: 8px 0 0 0;
   font-size: 14px;
   color: #666;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  line-height: 1.4;
 `;
 
-import { useEffect, useState } from 'react';
+import { Fragment, useEffect, useState } from 'react';
 
 interface KakaoMapProps {
   map: kakao.maps.Map | null;
   onCreateMap: (map: kakao.maps.Map) => void;
   stores: Store[];
   onBoundChange: (edges: kakao.maps.LatLngBounds) => void;
-  selectedStore: Store | null;
+  selectedStores: Store[] | null;
   onSelectStore: (store: Store | null) => void;
 }
 
@@ -112,7 +130,7 @@ const KakaoMap = ({
   map,
   onCreateMap,
   stores,
-  selectedStore,
+  selectedStores,
   onSelectStore,
   onBoundChange,
 }: KakaoMapProps) => {
@@ -246,26 +264,25 @@ const KakaoMap = ({
             zIndex={20}
           />
         )}
-        {map && (
-          <MarkerClusterer averageCenter={true} minLevel={5}>
-            {stores.map((store) => (
-              <MapMarker
-                key={`${store.name}-${store.lat}-${store.lng}`}
-                position={{ lat: store.lat, lng: store.lng }}
-                title={store.name}
-                onClick={() => void onSelectStore(store)}
-                image={{
-                  src: 'https://t1.daumcdn.net/localimg/localimages/07/mapapidoc/markerStar.png',
-                  size: { width: 24, height: 35 },
-                }}
-              />
-            ))}
-          </MarkerClusterer>
-        )}
+        {stores.map((store) => (
+          <MapMarker
+            key={`${store.name}-${store.lat}-${store.lng}`}
+            position={{ lat: store.lat, lng: store.lng }}
+            title={store.name}
+            onClick={() => void onSelectStore(store)}
+            image={{
+              src: 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0Ij4KICA8Y2lyY2xlIGN4PSIxMiIgY3k9IjEyIiByPSI4IiBmaWxsPSIjRkZEMzAwIiBzdHJva2U9IiNGRkYiIHN0cm9rZS13aWR0aD0iMiIvPgo8L3N2Zz4=',
+              size: { width: 24, height: 24 },
+            }}
+          />
+        ))}
 
-        {selectedStore && (
+        {selectedStores && selectedStores.length > 0 && (
           <CustomOverlayMap
-            position={{ lat: selectedStore.lat, lng: selectedStore.lng }}
+            position={{
+              lat: selectedStores[0].lat,
+              lng: selectedStores[0].lng,
+            }}
             clickable={true}
             zIndex={10}
           >
@@ -275,9 +292,6 @@ const KakaoMap = ({
                 // 인포윈도우 내부 클릭 시 이벤트 전파 중단
               }}
             >
-              <InfoTitle>{selectedStore.name}</InfoTitle>
-              <InfoCategory>{selectedStore.category}</InfoCategory>
-              <InfoAddress>{selectedStore.address}</InfoAddress>
               <button
                 style={{
                   position: 'absolute',
@@ -296,6 +310,15 @@ const KakaoMap = ({
               >
                 ✕
               </button>
+              {selectedStores.map((selectedStore) => (
+                <InfoItem>
+                  <div style={{ display: 'flex', alignItems: 'center' }}>
+                    <InfoTitle>{selectedStore.name}</InfoTitle>
+                    <InfoCategory>{selectedStore.category}</InfoCategory>
+                  </div>
+                  <InfoAddress>{selectedStore.address}</InfoAddress>
+                </InfoItem>
+              ))}
             </InfoWindow>
           </CustomOverlayMap>
         )}

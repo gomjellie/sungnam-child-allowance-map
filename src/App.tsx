@@ -158,7 +158,7 @@ function App() {
   const [filteredStores, setFilteredStores] = useState<Store[]>([]);
   const [selectedCategory, setSelectedCategory] = useState('전체');
   const [searchTerm, setSearchTerm] = useState('');
-  const [selectedStore, setSelectedStore] = useState<Store | null>(null);
+  const [selectedStores, setSelectedStores] = useState<Store[] | null>(null);
   const $bottomSheetRef = useRef<HTMLDivElement | null>(null);
   const containerHeightRef = useRef(45);
 
@@ -340,7 +340,7 @@ function App() {
   const handleCategoryChange = (category: string) => {
     handleFilter(category, searchTerm);
     setSelectedCategory(category);
-    setSelectedStore(null);
+    setSelectedStores(null);
     if (map) {
       // https://github.com/JaeSeoKim/react-kakao-maps-sdk/issues/77
       const little = 0.000001;
@@ -360,8 +360,17 @@ function App() {
           onCreateMap={setMap}
           onBoundChange={handleBoundChange}
           stores={filteredStores}
-          selectedStore={selectedStore}
-          onSelectStore={setSelectedStore}
+          selectedStores={selectedStores}
+          onSelectStore={(selected) => {
+            if (!selected) {
+              setSelectedStores(null);
+              return;
+            }
+            const newFilteredStores = filteredStores.filter((prev) => {
+              return prev.lat === selected.lat && prev.lng === selected.lng;
+            });
+            setSelectedStores(newFilteredStores);
+          }}
         />
       </MapSection>
       <StoreListContainer ref={$bottomSheetRef}>
@@ -389,7 +398,7 @@ function App() {
             <StoreCard
               key={`${store.name}-${store.lat}-${store.lng}`}
               onClick={() => {
-                setSelectedStore(store);
+                setSelectedStores([store]);
                 if (map) {
                   const moveLatLng = new window.kakao.maps.LatLng(
                     store.lat,
