@@ -66,9 +66,9 @@ const InfoItem = styled.div`
   flex-direction: column;
   width: 100%;
 
-  &:not(:last-child) {
-    border-bottom: 1px solid #e0e0e0; // 하단 경계선은 마지막 항목이 아닌 경우에만 표시
-    padding-bottom: 4px;
+  & + & {
+    border-top: 1px solid #e0e0e0; // 다음 형제가 InfoItem인 경우에만 상단 경계선 표시
+    padding-top: 4px;
   }
 `;
 
