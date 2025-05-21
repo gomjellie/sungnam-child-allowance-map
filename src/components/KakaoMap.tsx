@@ -1,4 +1,4 @@
-import { Map, MapMarker, CustomOverlayMap } from 'react-kakao-maps-sdk';
+import { Map, MapMarker, CustomOverlayMap, MarkerClusterer, MarkerClustererProps } from 'react-kakao-maps-sdk';
 import styled from 'styled-components';
 import { useFloating, offset, flip, shift, arrow, useInteractions, useClick, useDismiss, FloatingArrow } from '@floating-ui/react';
 
@@ -159,6 +159,7 @@ const KakaoMap = ({
   onSelectStore,
   onBoundChange,
 }: KakaoMapProps) => {
+  const [zoomLevel, setZoomLevel] = useState<number>(5);
   // 네이버 좌표를 기본으로
   const defaultCenter = {
     lat: 37.3595191509133,
@@ -232,6 +233,10 @@ const KakaoMap = ({
         onIdle={(target) => {
           onBoundChange(target.getBounds());
         }}
+        onZoomChanged={(target) => {
+          setZoomLevel(target.getLevel());
+          console.log({ zoomLevel: target.getLevel() });
+        }}
         title='map'
         onClick={() => void onSelectStore(null)}
       >
@@ -290,6 +295,7 @@ const KakaoMap = ({
             // zIndex={20}
           />
         )}
+        <Clusterer minLevel={4} zoomLevel={zoomLevel}>
         {chain(stores)
           .thru(stores => {
             const groups: Store[][] = [];
@@ -336,13 +342,14 @@ const KakaoMap = ({
                     <circle cx="12" cy="12" r="8" fill="#FFD300" stroke="#FFF" strokeWidth="2"/>
                   </svg>
                   <MarkerLabel title={storeNames}>
-                    {representativeStore.name.length > 8 ? `${representativeStore.name.slice(0, 8)}...` : representativeStore.name} 외 {groupedStores.length - 1}개
+                    {representativeStore.name.length > 8 ? `${representativeStore.name.slice(0, 8)}...` : representativeStore.name} {groupedStores.length > 1 ? `외 ${groupedStores.length - 1}개`: ''}
                   </MarkerLabel>
                 </MarkerContainer>
               </CustomOverlayMap>
             );
           })
           .value()}
+        </Clusterer>
 
         {selectedStores && selectedStores.length > 0 && (
           <CustomOverlayMap
@@ -422,5 +429,16 @@ const FloatingInfoWindow = ({ selectedStores, onClose }: { selectedStores: Store
     </div>
   );
 };
+
+/**
+ * MarkerClusterer에 버그가 있어서 확대가 많이 된 경우, MarkerClusterer를 덮지 않고 렌더링함
+ */
+const Clusterer = ({ children, zoomLevel, ...clustererProps }: { children: React.ReactNode, zoomLevel: number } & MarkerClustererProps) => {
+  if (zoomLevel < (clustererProps?.minLevel ?? 4)) {
+    return children;
+  }
+
+  return <MarkerClusterer {...clustererProps}>{children}</MarkerClusterer>
+}
 
 export default KakaoMap;
