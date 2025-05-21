@@ -53,7 +53,8 @@ const LocationButton = styled.button`
   color: black;
 
   &:active {
-    transform: scale(0.95);
+    transform: scale(0.98);
+    color: #2d64bc;
   }
 
   svg {

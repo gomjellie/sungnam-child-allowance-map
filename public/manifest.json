@@ -1,0 +1,17 @@
+{
+  "name": "성남시 아동수당 가맹점 지도",
+  "short_name": "성남 아동수당",
+  "description": "성남시 아동수당 가맹점의 위치를 지도에서 쉽게 찾아보세요",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#ffffff",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

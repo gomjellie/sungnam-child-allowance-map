@@ -336,7 +336,7 @@ function App() {
     search: string,
     sourceStores?: Store[]
   ) => {
-    let result = sourceStores ?? (search ? stores : storesInBound);
+    let result = search ? stores : sourceStores ?? storesInBound;
 
     // 카테고리 필터링
     if (category !== '전체') {
