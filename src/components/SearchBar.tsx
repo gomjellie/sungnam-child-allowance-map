@@ -1,13 +1,13 @@
 import { useState, ChangeEvent } from 'react';
 import styled from 'styled-components';
 
-const SearchContainer = styled.div`
+const SearchContainer = styled.label`
   position: relative;
   width: 100%;
 `;
 
 const SearchInput = styled.input`
-  padding: 8px 36px 8px 26px; /* 오른쪽 패딩 수정 */
+  padding: 12px 36px 12px 26px; /* 오른쪽 패딩 수정 */
   border: none;
   border-radius: 8px;
   font-size: 14px;
