@@ -13,6 +13,7 @@ import { fetchStores } from './services/storeService';
 import { chain, debounce } from 'lodash-es';
 import './App.css';
 import SearchBar from './components/SearchBar';
+import { Toaster } from 'react-hot-toast';
 
 interface Store {
   name: string;
@@ -127,9 +128,9 @@ const StoreCard = styled.div`
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   }
 
-  &[data-selected="true"] {
+  &[data-selected='true'] {
     background-color: #f0f7ff;
-    border-color: #2D64BC;
+    border-color: #2d64bc;
     box-shadow: 0 2px 8px rgba(45, 100, 188, 0.15);
   }
 `;
@@ -308,7 +309,7 @@ function App() {
       // 바텀시트가 화면을 가득 채우고 있을때는 이전의 값을 그대로 사용
       return;
     }
-    
+
     const filtered = chain(stores)
       .filter((store) =>
         bounds.contain(new kakao.maps.LatLng(store.lat, store.lng))
@@ -373,6 +374,7 @@ function App() {
 
   return (
     <AppContainer>
+      <Toaster position="top-center" toastOptions={{ duration: 1000 }} />
       <MapSection>
         <SearchBarContainer>
           <SearchBar onSearchChange={handleSearchChange} />
@@ -423,7 +425,9 @@ function App() {
                   map.panTo(moveLatLng);
                 }
                 const observer = new MutationObserver((_mutations) => {
-                  const targetElement = $storeListRef.current?.querySelector(`#${store.name.replace(/[^a-zA-Z0-9가-힣]/g, '_')}`);
+                  const targetElement = $storeListRef.current?.querySelector(
+                    `#${store.name.replace(/[^a-zA-Z0-9가-힣]/g, '_')}`
+                  );
                   if (targetElement) {
                     targetElement.scrollIntoView({
                       behavior: 'smooth',
@@ -435,13 +439,15 @@ function App() {
                 if ($storeListRef.current) {
                   observer.observe($storeListRef.current, {
                     childList: true,
-                    subtree: true
+                    subtree: true,
                   });
                 }
               }}
               style={{ cursor: 'pointer' }}
             >
-              <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+              <div
+                style={{ display: 'flex', alignItems: 'center', gap: '4px' }}
+              >
                 <StoreName>{store.name}</StoreName>
                 <StoreCategory>{store.category}</StoreCategory>
               </div>

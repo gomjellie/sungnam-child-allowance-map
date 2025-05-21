@@ -1,6 +1,22 @@
-import { Map, MapMarker, CustomOverlayMap, MarkerClusterer, MarkerClustererProps } from 'react-kakao-maps-sdk';
+import {
+  Map,
+  MapMarker,
+  CustomOverlayMap,
+  MarkerClusterer,
+  MarkerClustererProps,
+} from 'react-kakao-maps-sdk';
 import styled from 'styled-components';
-import { useFloating, offset, flip, shift, arrow, useInteractions, useClick, useDismiss, FloatingArrow } from '@floating-ui/react';
+import {
+  useFloating,
+  offset,
+  flip,
+  shift,
+  arrow,
+  useInteractions,
+  useClick,
+  useDismiss,
+  FloatingArrow,
+} from '@floating-ui/react';
 
 interface Store {
   name: string;
@@ -52,7 +68,7 @@ const InfoWindow = styled.div`
   gap: 8px;
   cursor: text;
   padding: 8px;
-  background-color: #FFFFFF;
+  background-color: #ffffff;
   border-radius: 8px;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
   width: 220px;
@@ -112,6 +128,19 @@ const InfoCategory = styled.span`
   font-size: 10px;
 `;
 
+const InfoAddressContainer = styled.button`
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  width: 100%;
+  transition: all 0.2s ease;
+
+  &:active {
+    transform: scale(0.98);
+    color: #2d64bc;
+  }
+`;
+
 const InfoAddress = styled.div`
   display: -webkit-box;
   margin: 0;
@@ -124,21 +153,48 @@ const InfoAddress = styled.div`
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   line-height: 1.4;
+  flex: 1;
+  cursor: pointer;
+`;
+
+const CopyIconContainer = styled.div`
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #666;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  color: currentColor;
+
+  svg {
+    width: 16px;
+    height: 16px;
+  }
 `;
 
 import { useEffect, useState, useRef } from 'react';
 import { chain } from 'lodash-es';
+import toast from 'react-hot-toast';
 
 // 두 지점 간의 거리를 계산하는 함수 (Haversine formula)
-const calculateDistance = (lat1: number, lon1: number, lat2: number, lon2: number): number => {
+const calculateDistance = (
+  lat1: number,
+  lon1: number,
+  lat2: number,
+  lon2: number
+): number => {
   const R = 6371; // 지구의 반지름 (km)
-  const dLat = (lat2 - lat1) * Math.PI / 180;
-  const dLon = (lon2 - lon1) * Math.PI / 180;
-  const a = 
-    Math.sin(dLat/2) * Math.sin(dLat/2) +
-    Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * 
-    Math.sin(dLon/2) * Math.sin(dLon/2);
-  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+  const dLat = ((lat2 - lat1) * Math.PI) / 180;
+  const dLon = ((lon2 - lon1) * Math.PI) / 180;
+  const a =
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos((lat1 * Math.PI) / 180) *
+      Math.cos((lat2 * Math.PI) / 180) *
+      Math.sin(dLon / 2) *
+      Math.sin(dLon / 2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
   return R * c * 1000; // 미터 단위로 변환
 };
 
@@ -236,7 +292,7 @@ const KakaoMap = ({
         onZoomChanged={(target) => {
           setZoomLevel(target.getLevel());
         }}
-        title='map'
+        title="map"
         onClick={() => void onSelectStore(null)}
       >
         <LocationButton onClick={handleLocationClick} title="현재 위치로 이동">
@@ -295,59 +351,77 @@ const KakaoMap = ({
           />
         )}
         <Clusterer minLevel={4} zoomLevel={zoomLevel}>
-        {chain(stores)
-          .thru(stores => {
-            const groups: Store[][] = [];
-            const processed = new Set<Store>();
+          {chain(stores)
+            .thru((stores) => {
+              const groups: Store[][] = [];
+              const processed = new Set<Store>();
 
-            stores.forEach(store => {
-              if (processed.has(store)) return;
+              stores.forEach((store) => {
+                if (processed.has(store)) return;
 
-              const group = [store];
-              processed.add(store);
+                const group = [store];
+                processed.add(store);
 
-              stores.forEach(otherStore => {
-                if (processed.has(otherStore)) return;
-                
-                const distance = calculateDistance(
-                  store.lat, store.lng,
-                  otherStore.lat, otherStore.lng
-                );
+                stores.forEach((otherStore) => {
+                  if (processed.has(otherStore)) return;
 
-                if (distance <= 15) { // 15미터 이내의 가게들을 그룹화
-                  group.push(otherStore);
-                  processed.add(otherStore);
-                }
+                  const distance = calculateDistance(
+                    store.lat,
+                    store.lng,
+                    otherStore.lat,
+                    otherStore.lng
+                  );
+
+                  if (distance <= 15) {
+                    // 15미터 이내의 가게들을 그룹화
+                    group.push(otherStore);
+                    processed.add(otherStore);
+                  }
+                });
+
+                groups.push(group);
               });
 
-              groups.push(group);
-            });
-
-            return groups;
-          })
-          .map((groupedStores) => {
-            const representativeStore = groupedStores[0];
-            const storeNames = groupedStores
-              .map((s) => s.name)
-              .join(', ');
-            return (
-              <CustomOverlayMap
-                key={`${representativeStore.name}-${representativeStore.lat}-${representativeStore.lng}`}
-                position={{ lat: representativeStore.lat, lng: representativeStore.lng }}
-                zIndex={10}
-              >
-                <MarkerContainer onClick={() => void onSelectStore(groupedStores)}>
-                  <svg width="24" height="24" viewBox="0 0 24 24">
-                    <circle cx="12" cy="12" r="8" fill="#FFD300" stroke="#FFF" strokeWidth="2"/>
-                  </svg>
-                  <MarkerLabel title={storeNames}>
-                    {representativeStore.name.length > 8 ? `${representativeStore.name.slice(0, 8)}...` : representativeStore.name} {groupedStores.length > 1 ? `외 ${groupedStores.length - 1}개`: ''}
-                  </MarkerLabel>
-                </MarkerContainer>
-              </CustomOverlayMap>
-            );
-          })
-          .value()}
+              return groups;
+            })
+            .map((groupedStores) => {
+              const representativeStore = groupedStores[0];
+              const storeNames = groupedStores.map((s) => s.name).join(', ');
+              return (
+                <CustomOverlayMap
+                  key={`${representativeStore.name}-${representativeStore.lat}-${representativeStore.lng}`}
+                  position={{
+                    lat: representativeStore.lat,
+                    lng: representativeStore.lng,
+                  }}
+                  zIndex={10}
+                >
+                  <MarkerContainer
+                    onClick={() => void onSelectStore(groupedStores)}
+                  >
+                    <svg width="24" height="24" viewBox="0 0 24 24">
+                      <circle
+                        cx="12"
+                        cy="12"
+                        r="8"
+                        fill="#FFD300"
+                        stroke="#FFF"
+                        strokeWidth="2"
+                      />
+                    </svg>
+                    <MarkerLabel title={storeNames}>
+                      {representativeStore.name.length > 8
+                        ? `${representativeStore.name.slice(0, 8)}...`
+                        : representativeStore.name}{' '}
+                      {groupedStores.length > 1
+                        ? `외 ${groupedStores.length - 1}개`
+                        : ''}
+                    </MarkerLabel>
+                  </MarkerContainer>
+                </CustomOverlayMap>
+              );
+            })
+            .value()}
         </Clusterer>
 
         {selectedStores && selectedStores.length > 0 && (
@@ -359,9 +433,9 @@ const KakaoMap = ({
             clickable={true}
             zIndex={11}
           >
-            <FloatingInfoWindow 
-              selectedStores={selectedStores} 
-              onClose={() => onSelectStore(null)} 
+            <FloatingInfoWindow
+              selectedStores={selectedStores}
+              onClose={() => onSelectStore(null)}
             />
           </CustomOverlayMap>
         )}
@@ -371,21 +445,31 @@ const KakaoMap = ({
 };
 
 // Floating UI를 사용한 InfoWindow 컴포넌트
-const FloatingInfoWindow = ({ selectedStores, onClose }: { selectedStores: Store[], onClose: () => void }) => {
+const FloatingInfoWindow = ({
+  selectedStores,
+  onClose,
+}: {
+  selectedStores: Store[];
+  onClose: () => void;
+}) => {
   const arrowRef = useRef(null);
   const { refs, floatingStyles, context } = useFloating({
-    middleware: [
-      offset(10),
-      flip(),
-      shift(),
-      arrow({ element: arrowRef })
-    ]
+    middleware: [offset(10), flip(), shift(), arrow({ element: arrowRef })],
   });
 
   const { getReferenceProps, getFloatingProps } = useInteractions([
     useClick(context),
-    useDismiss(context)
+    useDismiss(context),
   ]);
+
+  const handleCopy = async (string: string) => {
+    try {
+      await navigator.clipboard.writeText(string);
+      toast.success(`${string} 복사 완료!`);
+    } catch (err) {
+      toast.error(`${string} 복사 실패.`);
+    }
+  };
 
   return (
     <div ref={refs.setReference} {...getReferenceProps()}>
@@ -415,11 +499,40 @@ const FloatingInfoWindow = ({ selectedStores, onClose }: { selectedStores: Store
           </button>
           {selectedStores.map((selectedStore, index) => (
             <InfoItem key={index}>
-              <div style={{ display: 'flex', alignItems: 'center', maxWidth: '200px', overflowX: 'hidden' }}>
-                <InfoTitle>{selectedStore.name}</InfoTitle>
+              <div
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  maxWidth: '200px',
+                  overflowX: 'hidden',
+                }}
+              >
+                <InfoTitle onClick={() => handleCopy(selectedStore.name)}>
+                  {selectedStore.name}
+                </InfoTitle>
                 <InfoCategory>{selectedStore.category}</InfoCategory>
               </div>
-              <InfoAddress>{selectedStore.address}</InfoAddress>
+              <InfoAddressContainer
+                onClick={() => handleCopy(selectedStore.address)}
+              >
+                <CopyIconContainer title="주소 복사하기">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
+                    <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
+                    <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
+                  </svg>
+                </CopyIconContainer>
+                <InfoAddress>
+                  {selectedStore.address.replace(/^경기 성남시\s*/, '')}
+                </InfoAddress>
+              </InfoAddressContainer>
             </InfoItem>
           ))}
           <FloatingArrow ref={arrowRef} context={context} fill="#FFFFFF" />
@@ -432,12 +545,16 @@ const FloatingInfoWindow = ({ selectedStores, onClose }: { selectedStores: Store
 /**
  * MarkerClusterer에 버그가 있어서 확대가 많이 된 경우, MarkerClusterer를 덮지 않고 렌더링함
  */
-const Clusterer = ({ children, zoomLevel, ...clustererProps }: { children: React.ReactNode, zoomLevel: number } & MarkerClustererProps) => {
+const Clusterer = ({
+  children,
+  zoomLevel,
+  ...clustererProps
+}: { children: React.ReactNode; zoomLevel: number } & MarkerClustererProps) => {
   if (zoomLevel < (clustererProps?.minLevel ?? 4)) {
     return children;
   }
 
-  return <MarkerClusterer {...clustererProps}>{children}</MarkerClusterer>
-}
+  return <MarkerClusterer {...clustererProps}>{children}</MarkerClusterer>;
+};
 
 export default KakaoMap;
