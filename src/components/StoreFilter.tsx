@@ -77,7 +77,7 @@ const StoreFilter = ({
           >
             전체
           </CategoryButton>
-          {selectedCategory !== '전체' && (
+          {selectedCategory !== '전체' && !storesInBound.some((s) => s.category === selectedCategory) && (
             <CategoryButton
               active={true}
               onClick={() => handleCategoryClick('전체')}
@@ -92,7 +92,6 @@ const StoreFilter = ({
           )}
           {categories
             .filter((category) => categoriesInStores.includes(category))
-            .filter((category) => category !== selectedCategory)
             .sort((a, b) => {
               return (
                 storesInBound.filter((store) => store.category === b).length -
