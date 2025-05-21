@@ -396,6 +396,7 @@ function App() {
         <StoreListContent ref={$storeListRef}>
           {filteredStores.map((store) => (
             <StoreCard
+              id={store.name.replace(/[^a-zA-Z0-9가-힣]/g, '_')}
               key={`${store.name}-${store.lat}-${store.lng}`}
               onClick={() => {
                 setSelectedStores([store]);
@@ -407,6 +408,11 @@ function App() {
                   // map.setLevel(3); // 지도 확대 레벨 설정
                   map.panTo(moveLatLng);
                 }
+                setTimeout(() => {
+                  $storeListRef.current?.querySelector(`#${store.name.replace(/[^a-zA-Z0-9가-힣]/g, '_')}`)?.scrollIntoView({
+                    behavior: 'smooth',                    
+                  });
+                }, 1000);
               }}
               style={{ cursor: 'pointer' }}
             >
