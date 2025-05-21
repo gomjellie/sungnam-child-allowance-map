@@ -295,7 +295,7 @@ function App() {
       // 바텀시트가 화면을 가득 채우고 있을때는 이전의 값을 그대로 사용
       return;
     }
-    // 제너레이터에서 결과 수집
+    
     const filtered = chain(stores)
       .filter((store) =>
         bounds.contain(new kakao.maps.LatLng(store.lat, store.lng))
@@ -311,7 +311,7 @@ function App() {
           Math.pow(centerLat - b.lat, 2) + Math.pow(centerLng - b.lng, 2);
         return aDistance - bDistance;
       })
-      .take(999)
+      .take(499)
       .value();
     setStoresInBound(filtered ?? []);
     handleFilter(selectedCategory, searchTerm, filtered);
@@ -330,16 +330,13 @@ function App() {
     }
 
     // 검색어 필터링
-    if (search) {
+    if (search && search.length > 0) {
       result = result.filter((store) =>
         store.name.toLowerCase().includes(search.toLowerCase())
       );
     }
 
-    // 중복 제거
-    const uniqueResult = chain(result).uniqBy('name').value();
-
-    setFilteredStores(uniqueResult ?? []);
+    setFilteredStores(result ?? []);
   };
 
   const _handleSearchChange = (value: string) => {
@@ -393,7 +390,7 @@ function App() {
         >
           <StoreCount>
             가맹점 {filteredStores.length}개
-            {filteredStores.length === 999 ? '+' : ''}
+            {filteredStores.length === 499 ? '+' : ''}
           </StoreCount>
         </StoreListHeader>
         <StoreListContent ref={$storeListRef}>
