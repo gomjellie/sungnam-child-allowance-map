@@ -290,6 +290,10 @@ function App() {
 
     const bounds = new kakao.maps.LatLngBounds(sw, ne);
 
+    if ($bottomSheetRef.current?.style.height === '90dvh') {
+      // 바텀시트가 화면을 가득 채우고 있을때는 이전의 값을 그대로 사용
+      return;
+    }
     // 제너레이터에서 결과 수집
     const filtered = chain(stores)
       .filter((store) =>
