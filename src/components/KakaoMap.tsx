@@ -136,6 +136,7 @@ const InfoAddressContainer = styled.button`
   width: 100%;
   transition: all 0.2s ease;
 
+  background-color: white;
   &:active {
     transform: scale(0.98);
     color: #2d64bc;
@@ -159,7 +160,6 @@ const InfoAddress = styled.div`
 `;
 
 const CopyIconContainer = styled.div`
-  background: none;
   border: none;
   cursor: pointer;
   color: #666;
