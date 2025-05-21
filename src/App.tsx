@@ -130,6 +130,10 @@ const StoreCard = styled.div`
 const StoreName = styled.h3`
   margin: 0 8px 0 0;
   color: #333;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  flex: 1;
 `;
 
 const StoreInfo = styled.p`
@@ -145,6 +149,10 @@ const StoreCategory = styled.span`
   border-radius: 4px;
   font-size: 12px;
   margin-right: 5px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100px;
 `;
 
 function App() {
