@@ -61,6 +61,30 @@ const InfoWindow = styled.div`
   z-index: 10;
 `;
 
+const MarkerContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+`;
+
+const MarkerLabel = styled.div`
+  background-color: transparent;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 12px;
+  white-space: nowrap;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.9);
+  background-color: rgba(0, 0, 0, 0.3);
+  border-radius: 4px;
+  font-size: 12px;
+  color: white;
+  text-align: center;
+  max-width: 150px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+`;
+
 const InfoItem = styled.div`
   display: flex;
   flex-direction: column;
@@ -104,6 +128,19 @@ const InfoAddress = styled.div`
 
 import { useEffect, useState, useRef } from 'react';
 import { chain } from 'lodash-es';
+
+// 두 지점 간의 거리를 계산하는 함수 (Haversine formula)
+const calculateDistance = (lat1: number, lon1: number, lat2: number, lon2: number): number => {
+  const R = 6371; // 지구의 반지름 (km)
+  const dLat = (lat2 - lat1) * Math.PI / 180;
+  const dLon = (lon2 - lon1) * Math.PI / 180;
+  const a = 
+    Math.sin(dLat/2) * Math.sin(dLat/2) +
+    Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * 
+    Math.sin(dLon/2) * Math.sin(dLon/2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+  return R * c * 1000; // 미터 단위로 변환
+};
 
 interface KakaoMapProps {
   map: kakao.maps.Map | null;
@@ -254,28 +291,55 @@ const KakaoMap = ({
           />
         )}
         {chain(stores)
-          .groupBy((store) => `${store.lat},${store.lng}`)
-          .map((groupedStores, key) => {
+          .thru(stores => {
+            const groups: Store[][] = [];
+            const processed = new Set<Store>();
+
+            stores.forEach(store => {
+              if (processed.has(store)) return;
+
+              const group = [store];
+              processed.add(store);
+
+              stores.forEach(otherStore => {
+                if (processed.has(otherStore)) return;
+                
+                const distance = calculateDistance(
+                  store.lat, store.lng,
+                  otherStore.lat, otherStore.lng
+                );
+
+                if (distance <= 15) { // 15미터 이내의 가게들을 그룹화
+                  group.push(otherStore);
+                  processed.add(otherStore);
+                }
+              });
+
+              groups.push(group);
+            });
+
+            return groups;
+          })
+          .map((groupedStores) => {
             const representativeStore = groupedStores[0];
             const storeNames = groupedStores
               .map((s) => s.name)
               .join(', ');
             return (
-              <MapMarker
-                key={key}
+              <CustomOverlayMap
+                key={`${representativeStore.name}-${representativeStore.lat}-${representativeStore.lng}`}
                 position={{ lat: representativeStore.lat, lng: representativeStore.lng }}
-                title={storeNames}
-                onClick={() => void onSelectStore(groupedStores)}
-                image={{
-                  src: 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0Ij4KICA8Y2lyY2xlIGN4PSIxMiIgY3k9IjEyIiByPSI4IiBmaWxsPSIjRkZEMzAwIiBzdHJva2U9IiNGRkYiIHN0cm9rZS13aWR0aD0iMiIvPgo8L3N2Zz4=',
-                  size: { width: 24, height: 24 },
-                  options: {
-                    alt: storeNames,
-                  }
-                }}
                 zIndex={10}
               >
-              </MapMarker>
+                <MarkerContainer onClick={() => void onSelectStore(groupedStores)}>
+                  <svg width="24" height="24" viewBox="0 0 24 24">
+                    <circle cx="12" cy="12" r="8" fill="#FFD300" stroke="#FFF" strokeWidth="2"/>
+                  </svg>
+                  <MarkerLabel title={storeNames}>
+                    {representativeStore.name.length > 8 ? `${representativeStore.name.slice(0, 8)}...` : representativeStore.name} 외 {groupedStores.length - 1}개
+                  </MarkerLabel>
+                </MarkerContainer>
+              </CustomOverlayMap>
             );
           })
           .value()}
