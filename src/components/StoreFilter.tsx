@@ -1,5 +1,6 @@
 import styled from 'styled-components';
 import { Store } from '../services/storeService';
+import { useAutoAnimate } from '@formkit/auto-animate/react';
 
 const FilterContainer = styled.div`
   z-index: 10;
@@ -60,6 +61,8 @@ const StoreFilter = ({
   categories: string[];
   onCategoryChange: (category: string) => void;
 }) => {
+  const [animateParent] = useAutoAnimate();
+  
   const handleCategoryClick = (category: string) => {
     onCategoryChange(category);
   };
@@ -70,7 +73,7 @@ const StoreFilter = ({
     <FilterContainer>
       <FilterSection>
         <SectionTitle>카테고리</SectionTitle>
-        <CategoryContainer>
+        <CategoryContainer ref={animateParent}>
           <CategoryButton
             active={selectedCategory === '전체'}
             onClick={() => handleCategoryClick('전체')}

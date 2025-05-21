@@ -160,6 +160,7 @@ function App() {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedStores, setSelectedStores] = useState<Store[] | null>(null);
   const $bottomSheetRef = useRef<HTMLDivElement | null>(null);
+  const $storeListRef = useRef<HTMLDivElement | null>(null);
   const containerHeightRef = useRef(45);
 
   useEffect(() => {
@@ -357,6 +358,7 @@ function App() {
       // 지도를 살짝 이동시켜 마커 업데이트를 트리거
       map.panBy(0, -little);
     }
+    $storeListRef.current?.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   return (
@@ -394,7 +396,7 @@ function App() {
             {filteredStores.length === 999 ? '+' : ''}
           </StoreCount>
         </StoreListHeader>
-        <StoreListContent>
+        <StoreListContent ref={$storeListRef}>
           {filteredStores.map((store) => (
             <StoreCard
               key={`${store.name}-${store.lat}-${store.lng}`}

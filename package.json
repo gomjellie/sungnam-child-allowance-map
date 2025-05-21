@@ -11,6 +11,7 @@
   },
   "dependencies": {
     "@floating-ui/react": "^0.27.8",
+    "@formkit/auto-animate": "^0.8.2",
     "@types/puppeteer": "^5.4.7",
     "axios": "^1.9.0",
     "puppeteer": "^24.7.2",
