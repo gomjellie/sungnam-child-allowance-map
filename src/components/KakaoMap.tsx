@@ -83,6 +83,7 @@ const MarkerContainer = styled.div`
   flex-direction: column;
   align-items: center;
   gap: 4px;
+  cursor: pointer;
 `;
 
 const MarkerLabel = styled.div`
@@ -137,6 +138,7 @@ const InfoAddressContainer = styled.button`
   transition: all 0.2s ease;
 
   background-color: white;
+  color: black;
   &:active {
     transform: scale(0.98);
     color: #2d64bc;
@@ -166,8 +168,6 @@ const CopyIconContainer = styled.div`
   display: flex;
   align-items: center;
   justify-content: center;
-
-  color: currentColor;
 
   svg {
     width: 16px;
@@ -396,6 +396,7 @@ const KakaoMap = ({
                     lng: representativeStore.lng,
                   }}
                   zIndex={10}
+                  clickable={true}
                 >
                   <MarkerContainer
                     onClick={() => void onSelectStore(groupedStores)}
@@ -435,6 +436,7 @@ const KakaoMap = ({
             zIndex={11}
           >
             <FloatingInfoWindow
+              map={map}
               selectedStores={selectedStores}
               onClose={() => onSelectStore(null)}
             />
@@ -449,7 +451,9 @@ const KakaoMap = ({
 const FloatingInfoWindow = ({
   selectedStores,
   onClose,
+  map,
 }: {
+  map: kakao.maps.Map | null;
   selectedStores: Store[];
   onClose: () => void;
 }) => {
@@ -479,7 +483,15 @@ const FloatingInfoWindow = ({
         style={floatingStyles}
         {...getFloatingProps()}
       >
-        <InfoWindow onClick={(e) => e.stopPropagation()}>
+        <InfoWindow
+          onMouseEnter={(_e) => {
+            map?.setZoomable(false);
+          }}
+          onMouseLeave={(_e) => {
+            map?.setZoomable(true);
+          }}
+          onClick={(e) => e.stopPropagation()}
+        >
           <button
             style={{
               position: 'absolute',
