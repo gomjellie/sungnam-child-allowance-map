@@ -408,11 +408,22 @@ function App() {
                   // map.setLevel(3); // 지도 확대 레벨 설정
                   map.panTo(moveLatLng);
                 }
-                setTimeout(() => {
-                  $storeListRef.current?.querySelector(`#${store.name.replace(/[^a-zA-Z0-9가-힣]/g, '_')}`)?.scrollIntoView({
-                    behavior: 'smooth',                    
+                const observer = new MutationObserver((_mutations) => {
+                  const targetElement = $storeListRef.current?.querySelector(`#${store.name.replace(/[^a-zA-Z0-9가-힣]/g, '_')}`);
+                  if (targetElement) {
+                    targetElement.scrollIntoView({
+                      behavior: 'smooth',
+                    });
+                    observer.disconnect();
+                  }
+                });
+
+                if ($storeListRef.current) {
+                  observer.observe($storeListRef.current, {
+                    childList: true,
+                    subtree: true
                   });
-                }, 1000);
+                }
               }}
               style={{ cursor: 'pointer' }}
             >
