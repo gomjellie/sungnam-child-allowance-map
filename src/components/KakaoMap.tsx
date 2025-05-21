@@ -1,5 +1,6 @@
 import { Map, MapMarker, CustomOverlayMap } from 'react-kakao-maps-sdk';
 import styled from 'styled-components';
+import { useFloating, offset, flip, shift, arrow, useInteractions, useClick, useDismiss, FloatingArrow } from '@floating-ui/react';
 
 interface Store {
   name: string;
@@ -51,28 +52,13 @@ const InfoWindow = styled.div`
   gap: 8px;
   cursor: text;
   padding: 8px;
-  background-color: white;
+  background-color: #FFFFFF;
   border-radius: 8px;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
   width: 220px;
-  position: absolute;
-  overflow-y: scroll;
+  overflow-y: auto;
   max-height: 300px;
-  bottom: 50px;
-  left: 50%;
-  transform: translateX(-50%);
   z-index: 10;
-
-  &::after {
-    content: '';
-    position: absolute;
-    bottom: -8px;
-    left: 50%;
-    transform: translateX(-50%);
-    border-left: 8px solid transparent;
-    border-right: 8px solid transparent;
-    border-top: 8px solid white;
-  }
 `;
 
 const InfoItem = styled.div`
@@ -82,8 +68,8 @@ const InfoItem = styled.div`
 
   &:not(:last-child) {
     border-bottom: 1px solid #e0e0e0; // 하단 경계선은 마지막 항목이 아닌 경우에만 표시
+    padding-bottom: 4px;
   }
-  padding-bottom: 4px;
 `;
 
 const InfoTitle = styled.h3`
@@ -97,17 +83,18 @@ const InfoTitle = styled.h3`
 const InfoCategory = styled.span`
   display: inline-block;
   background-color: #f0f0f0;
-  padding: 3px 6px;
+  padding: 2px 4px;
   border-radius: 4px;
-  font-size: 12px;
+  font-size: 10px;
 `;
 
 const InfoAddress = styled.div`
   display: -webkit-box;
-  margin: 8px 0 0 0;
+  margin: 0;
   font-size: 14px;
   color: #666;
-  max-width: 100%;
+  max-width: 200px;
+  max-height: 40px;
   overflow: hidden;
   text-overflow: ellipsis;
   -webkit-line-clamp: 2;
@@ -115,7 +102,8 @@ const InfoAddress = styled.div`
   line-height: 1.4;
 `;
 
-import { Fragment, useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
+import { chain } from 'lodash-es';
 
 interface KakaoMapProps {
   map: kakao.maps.Map | null;
@@ -123,7 +111,7 @@ interface KakaoMapProps {
   stores: Store[];
   onBoundChange: (edges: kakao.maps.LatLngBounds) => void;
   selectedStores: Store[] | null;
-  onSelectStore: (store: Store | null) => void;
+  onSelectStore: (stores: Store[] | null) => void;
 }
 
 const KakaoMap = ({
@@ -207,6 +195,7 @@ const KakaoMap = ({
         onIdle={(target) => {
           onBoundChange(target.getBounds());
         }}
+        title='map'
         onClick={() => void onSelectStore(null)}
       >
         <LocationButton onClick={handleLocationClick} title="현재 위치로 이동">
@@ -264,18 +253,32 @@ const KakaoMap = ({
             zIndex={20}
           />
         )}
-        {stores.map((store) => (
-          <MapMarker
-            key={`${store.name}-${store.lat}-${store.lng}`}
-            position={{ lat: store.lat, lng: store.lng }}
-            title={store.name}
-            onClick={() => void onSelectStore(store)}
-            image={{
-              src: 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0Ij4KICA8Y2lyY2xlIGN4PSIxMiIgY3k9IjEyIiByPSI4IiBmaWxsPSIjRkZEMzAwIiBzdHJva2U9IiNGRkYiIHN0cm9rZS13aWR0aD0iMiIvPgo8L3N2Zz4=',
-              size: { width: 24, height: 24 },
-            }}
-          />
-        ))}
+        {chain(stores)
+          .groupBy((store) => `${store.lat},${store.lng}`)
+          .map((groupedStores, key) => {
+            const representativeStore = groupedStores[0];
+            const storeNames = groupedStores
+              .map((s) => s.name)
+              .join(', ');
+            return (
+              <MapMarker
+                key={key}
+                position={{ lat: representativeStore.lat, lng: representativeStore.lng }}
+                title={storeNames}
+                onClick={() => void onSelectStore(groupedStores)}
+                image={{
+                  src: 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0Ij4KICA8Y2lyY2xlIGN4PSIxMiIgY3k9IjEyIiByPSI4IiBmaWxsPSIjRkZEMzAwIiBzdHJva2U9IiNGRkYiIHN0cm9rZS13aWR0aD0iMiIvPgo8L3N2Zz4=',
+                  size: { width: 24, height: 24 },
+                  options: {
+                    alt: storeNames,
+                  }
+                }}
+                zIndex={10}
+              >
+              </MapMarker>
+            );
+          })
+          .value()}
 
         {selectedStores && selectedStores.length > 0 && (
           <CustomOverlayMap
@@ -284,46 +287,75 @@ const KakaoMap = ({
               lng: selectedStores[0].lng,
             }}
             clickable={true}
-            zIndex={10}
+            zIndex={11}
           >
-            <InfoWindow
-              onClick={(e) => {
-                e.stopPropagation();
-                // 인포윈도우 내부 클릭 시 이벤트 전파 중단
-              }}
-            >
-              <button
-                style={{
-                  position: 'absolute',
-                  top: '5px',
-                  right: '5px',
-                  background: 'none',
-                  border: 'none',
-                  cursor: 'pointer',
-                  fontSize: '16px',
-                  color: '#999',
-                }}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onSelectStore(null);
-                }}
-              >
-                ✕
-              </button>
-              {selectedStores.map((selectedStore) => (
-                <InfoItem>
-                  <div style={{ display: 'flex', alignItems: 'center' }}>
-                    <InfoTitle>{selectedStore.name}</InfoTitle>
-                    <InfoCategory>{selectedStore.category}</InfoCategory>
-                  </div>
-                  <InfoAddress>{selectedStore.address}</InfoAddress>
-                </InfoItem>
-              ))}
-            </InfoWindow>
+            <FloatingInfoWindow 
+              selectedStores={selectedStores} 
+              onClose={() => onSelectStore(null)} 
+            />
           </CustomOverlayMap>
         )}
       </Map>
     </MapContainer>
+  );
+};
+
+// Floating UI를 사용한 InfoWindow 컴포넌트
+const FloatingInfoWindow = ({ selectedStores, onClose }: { selectedStores: Store[], onClose: () => void }) => {
+  const arrowRef = useRef(null);
+  const { refs, floatingStyles, context } = useFloating({
+    middleware: [
+      offset(10),
+      flip(),
+      shift(),
+      arrow({ element: arrowRef })
+    ]
+  });
+
+  const { getReferenceProps, getFloatingProps } = useInteractions([
+    useClick(context),
+    useDismiss(context)
+  ]);
+
+  return (
+    <div ref={refs.setReference} {...getReferenceProps()}>
+      <div
+        ref={refs.setFloating}
+        style={floatingStyles}
+        {...getFloatingProps()}
+      >
+        <InfoWindow onClick={(e) => e.stopPropagation()}>
+          <button
+            style={{
+              position: 'absolute',
+              top: '5px',
+              right: '5px',
+              background: 'none',
+              border: 'none',
+              cursor: 'pointer',
+              fontSize: '16px',
+              color: '#999',
+            }}
+            onClick={(e) => {
+              e.stopPropagation();
+              onClose();
+            }}
+          >
+            ✕
+          </button>
+          {selectedStores.map((selectedStore, index) => (
+            <InfoItem key={index}>
+              <div style={{ display: 'flex', alignItems: 'center', maxWidth: '200px', overflowX: 'hidden' }}>
+                <InfoTitle>{selectedStore.name}</InfoTitle>
+                <InfoCategory>{selectedStore.category}</InfoCategory>
+              </div>
+              <InfoAddress>{selectedStore.address}</InfoAddress>
+            </InfoItem>
+          ))}
+          <FloatingArrow ref={arrowRef} context={context} fill="#FFFFFF" />
+        </InfoWindow>
+      </div>
+    </div>
   );
 };
 

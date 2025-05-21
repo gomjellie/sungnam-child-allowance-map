@@ -367,16 +367,7 @@ function App() {
           onBoundChange={handleBoundChange}
           stores={filteredStores}
           selectedStores={selectedStores}
-          onSelectStore={(selected) => {
-            if (!selected) {
-              setSelectedStores(null);
-              return;
-            }
-            const newFilteredStores = filteredStores.filter((prev) => {
-              return prev.lat === selected.lat && prev.lng === selected.lng;
-            });
-            setSelectedStores(newFilteredStores);
-          }}
+          onSelectStore={(stores) => setSelectedStores(stores)}
         />
       </MapSection>
       <StoreListContainer ref={$bottomSheetRef}>
