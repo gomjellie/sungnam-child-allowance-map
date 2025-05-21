@@ -235,7 +235,6 @@ const KakaoMap = ({
         }}
         onZoomChanged={(target) => {
           setZoomLevel(target.getLevel());
-          console.log({ zoomLevel: target.getLevel() });
         }}
         title='map'
         onClick={() => void onSelectStore(null)}
