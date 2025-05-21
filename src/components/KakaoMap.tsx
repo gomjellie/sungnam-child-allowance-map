@@ -122,10 +122,10 @@ const KakaoMap = ({
   onSelectStore,
   onBoundChange,
 }: KakaoMapProps) => {
-  // 성남시 중심 좌표 (대략적인 위치)
+  // 네이버 좌표를 기본으로
   const defaultCenter = {
-    lat: 37.4449168,
-    lng: 127.1388684,
+    lat: 37.3595191509133,
+    lng: 127.105220574005,
   };
   const [currentPosition, setCurrentPosition] = useState<{
     lat: number;
