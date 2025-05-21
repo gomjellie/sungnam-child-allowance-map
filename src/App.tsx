@@ -120,11 +120,17 @@ const StoreCard = styled.div`
   padding: 8px;
   background-color: white;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-  transition: transform 0.2s;
+  transition: all 0.2s ease;
 
   &:active {
     transform: scale(0.98);
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  }
+
+  &[data-selected="true"] {
+    background-color: #f0f7ff;
+    border-color: #2D64BC;
+    box-shadow: 0 2px 8px rgba(45, 100, 188, 0.15);
   }
 `;
 
@@ -405,6 +411,7 @@ function App() {
             <StoreCard
               id={store.name.replace(/[^a-zA-Z0-9가-힣]/g, '_')}
               key={`${store.name}-${store.lat}-${store.lng}`}
+              data-selected={selectedStores?.includes(store)}
               onClick={() => {
                 setSelectedStores([store]);
                 if (map) {
