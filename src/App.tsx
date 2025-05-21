@@ -103,6 +103,7 @@ const StoreCount = styled.h3`
   font-weight: 600;
   color: #333;
   margin: 0;
+  cursor: grab;
 `;
 
 const StoreListContent = styled.div`
