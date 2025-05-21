@@ -10,13 +10,39 @@ export default defineConfig({
       registerType: 'autoUpdate',
       manifest: {
         name: '성남시 아동수당 가맹점 지도',
-        short_name: '성남 아동수당',
+        short_name: '아동수당 가맹점 지도',
         description: '성남시 아동수당 가맹점의 위치를 지도에서 쉽게 찾아보세요',
         start_url: '/',
         display: 'standalone',
         background_color: '#ffffff',
-        theme_color: '#ffffff',
+        theme_color: '#2d64bc',
+        orientation: 'portrait',
         icons: [
+          {
+            src: '/android-chrome-192x192.png',
+            sizes: '192x192',
+            type: 'image/png',
+          },
+          {
+            src: '/android-chrome-512x512.png',
+            sizes: '512x512',
+            type: 'image/png',
+          },
+          {
+            src: '/apple-touch-icon.png',
+            sizes: '180x180',
+            type: 'image/png',
+          },
+          {
+            src: '/favicon-32x32.png',
+            sizes: '32x32',
+            type: 'image/png',
+          },
+          {
+            src: '/favicon-16x16.png',
+            sizes: '16x16',
+            type: 'image/png',
+          },
           {
             src: '/favicon.svg',
             sizes: 'any',
