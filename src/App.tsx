@@ -94,6 +94,7 @@ const DragHandle = styled.div`
 
 const StoreListHeader = styled.div`
   padding: 16px;
+  padding-bottom: 8px;
 `;
 
 const StoreCount = styled.h3`
@@ -109,46 +110,44 @@ const StoreListContent = styled.div`
   padding: 0 16px 16px;
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-  gap: 15px;
+  gap: 4px;
   align-content: start;
 `;
 
 const StoreCard = styled.div`
   border: 1px solid #ddd;
   border-radius: 8px;
-  padding: 15px;
+  padding: 8px;
   background-color: white;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
   transition: transform 0.2s;
 
-  &:hover {
-    transform: translateY(-3px);
+  &:active {
+    transform: scale(0.98);
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   }
 `;
 
 const StoreName = styled.h3`
-  margin: 0 8px 0 0;
+  margin: 0;
   color: #333;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  flex: 1;
+  font-size: 14px;
 `;
 
 const StoreInfo = styled.p`
-  margin: 5px 0;
   color: #666;
-  font-size: 14px;
+  font-size: 11px;
 `;
 
 const StoreCategory = styled.span`
   display: inline-block;
   background-color: #f0f0f0;
-  padding: 4px 8px;
+  padding: 2px 6px;
   border-radius: 4px;
-  font-size: 12px;
-  margin-right: 5px;
+  font-size: 11px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -435,7 +434,7 @@ function App() {
               }}
               style={{ cursor: 'pointer' }}
             >
-              <div style={{ display: 'flex', alignItems: 'center' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
                 <StoreName>{store.name}</StoreName>
                 <StoreCategory>{store.category}</StoreCategory>
               </div>
