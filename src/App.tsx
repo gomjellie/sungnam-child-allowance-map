@@ -13,7 +13,7 @@ import { fetchStores } from './services/storeService';
 import { chain, debounce } from 'lodash-es';
 import './App.css';
 import SearchBar from './components/SearchBar';
-import { Toaster } from 'react-hot-toast';
+import { ToastContainer } from 'react-toastify';
 
 interface Store {
   name: string;
@@ -374,7 +374,7 @@ function App() {
 
   return (
     <AppContainer>
-      <Toaster position="top-center" toastOptions={{ duration: 1000 }} />
+      <ToastContainer position="top-center" autoClose={1000} />
       <MapSection>
         <SearchBarContainer>
           <SearchBar onSearchChange={handleSearchChange} />

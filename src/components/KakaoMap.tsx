@@ -177,7 +177,7 @@ const CopyIconContainer = styled.div`
 
 import { useEffect, useState, useRef } from 'react';
 import { chain } from 'lodash-es';
-import toast from 'react-hot-toast';
+import { toast } from 'react-toastify';
 
 // 두 지점 간의 거리를 계산하는 함수 (Haversine formula)
 const calculateDistance = (
