@@ -24,7 +24,7 @@ const SearchInput = styled.input`
   &::placeholder {
     color: #999;
   }
-  color: black;  
+  color: black;
 `;
 
 const SearchIcon = styled.div`
@@ -93,7 +93,7 @@ const SearchBar = ({
       </SearchIcon>
       <SearchInput
         type="text"
-        placeholder="성남시 아동수당 가맹점 이름 또는 주소 검색..."
+        placeholder="성남시 아동수당 가맹점 이름 검색"
         value={searchValue}
         onChange={handleSearchChange}
       />
