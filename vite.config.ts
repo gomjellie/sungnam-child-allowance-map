@@ -13,7 +13,7 @@ export default defineConfig({
         short_name: '아동수당 가맹점 지도',
         description: '성남시 아동수당 가맹점의 위치를 지도에서 쉽게 찾아보세요',
         start_url: '/',
-        display: 'standalone',
+        display: 'fullscreen',
         background_color: '#ffffff',
         theme_color: '#2d64bc',
         orientation: 'portrait',

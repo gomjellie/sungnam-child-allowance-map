@@ -43,6 +43,9 @@ const MapSection = styled.div`
 const SearchBarContainer = styled.div`
   position: absolute;
   top: 8px;
+  @media (display-mode: fullscreen) {
+    top: env(safe-area-inset-top);
+  }
   left: 8px;
   right: 8px;
   z-index: 10;
@@ -71,7 +74,6 @@ const StoreListContainer = styled.div`
   display: flex;
   flex-direction: column;
   touch-action: none;
-  bottom: env(safe-area-inset-bottom);
   height: 45dvh;
   max-height: 90dvh;
 `;
@@ -114,6 +116,7 @@ const StoreListContent = styled.div`
   grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
   gap: 4px;
   align-content: start;
+  padding-bottom: env(safe-area-inset-bottom);
 `;
 
 const StoreCard = styled.div`
