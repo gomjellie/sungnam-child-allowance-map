@@ -5,6 +5,7 @@ import {
   useMemo,
   TouchEvent,
   MouseEvent,
+  startTransition,
 } from 'react';
 import styled from 'styled-components';
 import KakaoMap from './components/KakaoMap';
@@ -331,8 +332,11 @@ function App() {
       })
       .take(499)
       .value();
-    setStoresInBound(filtered ?? []);
-    handleFilter(selectedCategory, searchTerm, filtered);
+
+    startTransition(() => {
+      setStoresInBound(filtered ?? []);
+      handleFilter(selectedCategory, searchTerm, filtered);
+    });
   };
 
   const handleFilter = (
@@ -354,19 +358,26 @@ function App() {
       );
     }
 
-    setFilteredStores(result ?? []);
+    startTransition(() => {
+      setFilteredStores(result ?? []);
+    });
   };
 
   const _handleSearchChange = (value: string) => {
-    setSearchTerm(value);
-    handleFilter(selectedCategory, value);
+    startTransition(() => {
+      setSearchTerm(value);
+      handleFilter(selectedCategory, value);
+    });
   };
   const handleSearchChange = debounce(_handleSearchChange, 300);
 
   const handleCategoryChange = (category: string) => {
-    handleFilter(category, searchTerm);
-    setSelectedCategory(category);
-    setSelectedStores(null);
+    startTransition(() => {
+      handleFilter(category, searchTerm);
+      setSelectedCategory(category);
+      setSelectedStores(null);
+    });
+
     if (map) {
       // https://github.com/JaeSeoKim/react-kakao-maps-sdk/issues/77
       const little = 0.000001;
