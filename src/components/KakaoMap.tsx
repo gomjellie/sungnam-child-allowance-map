@@ -396,7 +396,6 @@ const KakaoMap = ({
                     lng: representativeStore.lng,
                   }}
                   zIndex={10}
-                  clickable={true}
                 >
                   <MarkerContainer
                     onClick={() => void onSelectStore(groupedStores)}
