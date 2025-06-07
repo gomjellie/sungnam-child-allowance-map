@@ -176,7 +176,7 @@ const CopyIconContainer = styled.div`
 `;
 
 import { useEffect, useState, useRef } from 'react';
-import { chain } from 'lodash-es';
+import { thru } from 'lodash-es';
 import { toast } from 'react-toastify';
 
 // 두 지점 간의 거리를 계산하는 함수 (Haversine formula)
@@ -352,77 +352,74 @@ const KakaoMap = ({
           />
         )}
         <Clusterer minLevel={4} zoomLevel={zoomLevel}>
-          {chain(stores)
-            .thru((stores) => {
-              const groups: Store[][] = [];
-              const processed = new Set<Store>();
+          {thru(stores, (stores) => {
+            const groups: Store[][] = [];
+            const processed = new Set<Store>();
 
-              stores.forEach((store) => {
-                if (processed.has(store)) return;
+            stores.forEach((store) => {
+              if (processed.has(store)) return;
 
-                const group = [store];
-                processed.add(store);
+              const group = [store];
+              processed.add(store);
 
-                stores.forEach((otherStore) => {
-                  if (processed.has(otherStore)) return;
+              stores.forEach((otherStore) => {
+                if (processed.has(otherStore)) return;
 
-                  const distance = calculateDistance(
-                    store.lat,
-                    store.lng,
-                    otherStore.lat,
-                    otherStore.lng
-                  );
+                const distance = calculateDistance(
+                  store.lat,
+                  store.lng,
+                  otherStore.lat,
+                  otherStore.lng
+                );
 
-                  if (distance <= 15) {
-                    // 15미터 이내의 가게들을 그룹화
-                    group.push(otherStore);
-                    processed.add(otherStore);
-                  }
-                });
-
-                groups.push(group);
+                if (distance <= 15) {
+                  // 15미터 이내의 가게들을 그룹화
+                  group.push(otherStore);
+                  processed.add(otherStore);
+                }
               });
 
-              return groups;
-            })
-            .map((groupedStores) => {
-              const representativeStore = groupedStores[0];
-              const storeNames = groupedStores.map((s) => s.name).join(', ');
-              return (
-                <CustomOverlayMap
-                  key={`${representativeStore.name}-${representativeStore.lat}-${representativeStore.lng}`}
-                  position={{
-                    lat: representativeStore.lat,
-                    lng: representativeStore.lng,
-                  }}
-                  zIndex={10}
+              groups.push(group);
+            });
+
+            return groups;
+          }).map((groupedStores) => {
+            const representativeStore = groupedStores[0];
+            const storeNames = groupedStores.map((s) => s.name).join(', ');
+            return (
+              <CustomOverlayMap
+                key={`${representativeStore.name}-${representativeStore.lat}-${representativeStore.lng}`}
+                position={{
+                  lat: representativeStore.lat,
+                  lng: representativeStore.lng,
+                }}
+                zIndex={10}
+              >
+                <MarkerContainer
+                  onClick={() => void onSelectStore(groupedStores)}
                 >
-                  <MarkerContainer
-                    onClick={() => void onSelectStore(groupedStores)}
-                  >
-                    <svg width="24" height="24" viewBox="0 0 24 24">
-                      <circle
-                        cx="12"
-                        cy="12"
-                        r="8"
-                        fill="#FFD300"
-                        stroke="#FFF"
-                        strokeWidth="2"
-                      />
-                    </svg>
-                    <MarkerLabel title={storeNames}>
-                      {representativeStore.name.length > 8
-                        ? `${representativeStore.name.slice(0, 8)}...`
-                        : representativeStore.name}{' '}
-                      {groupedStores.length > 1
-                        ? `외 ${groupedStores.length - 1}개`
-                        : ''}
-                    </MarkerLabel>
-                  </MarkerContainer>
-                </CustomOverlayMap>
-              );
-            })
-            .value()}
+                  <svg width="24" height="24" viewBox="0 0 24 24">
+                    <circle
+                      cx="12"
+                      cy="12"
+                      r="8"
+                      fill="#FFD300"
+                      stroke="#FFF"
+                      strokeWidth="2"
+                    />
+                  </svg>
+                  <MarkerLabel title={storeNames}>
+                    {representativeStore.name.length > 8
+                      ? `${representativeStore.name.slice(0, 8)}...`
+                      : representativeStore.name}{' '}
+                    {groupedStores.length > 1
+                      ? `외 ${groupedStores.length - 1}개`
+                      : ''}
+                  </MarkerLabel>
+                </MarkerContainer>
+              </CustomOverlayMap>
+            );
+          })}
         </Clusterer>
 
         {selectedStores && selectedStores.length > 0 && (

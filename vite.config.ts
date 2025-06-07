@@ -47,12 +47,13 @@ export default defineConfig({
             src: '/favicon.svg',
             sizes: 'any',
             type: 'image/svg+xml',
-            purpose: 'any maskable',
           },
         ],
       },
       workbox: {
         globPatterns: ['**/*.{js,css,html,ico,png,svg}'],
+        maximumFileSizeToCacheInBytes: 5 * 1024 ** 2,
+        cleanupOutdatedCaches: true,
         runtimeCaching: [
           {
             urlPattern: /^https:\/\/dapi\.kakao\.com/,
@@ -71,5 +72,8 @@ export default defineConfig({
   ],
   server: {
     allowedHosts: ['sungnam.inkyu.store'],
+  },
+  preview: {
+    port: 5173,
   },
 });
