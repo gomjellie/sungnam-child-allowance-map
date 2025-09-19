@@ -1,6 +1,5 @@
-// 환경 변수를 통한 API 키 관리 (보안을 위해 권장)
-// const API_KEY = import.meta.env.VITE_API_KEY;
-import enrichedStores from '../../data/filteredMerchants.json';
+// JSON 데이터 직접 import
+import storeData from '../../data/filteredMerchants.json';
 
 export type Store = {
   name: string;
@@ -13,14 +12,14 @@ export type Store = {
 
 export const fetchStores = (): Store[] => {
   try {
-    return enrichedStores;
+    return storeData as Store[];
   } catch (error) {
     console.error('가맹점 데이터를 가져오는 중 오류가 발생했습니다:', error);
     return [];
   }
 };
 
-export const fetchStoresByCategory = (category: string) => {
+export const fetchStoresByCategory = (category: string): Store[] => {
   try {
     const stores = fetchStores();
     if (category === '전체') return stores;

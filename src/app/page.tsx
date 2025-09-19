@@ -1,3 +1,5 @@
+'use client';
+
 import {
   useState,
   useEffect,
@@ -8,13 +10,14 @@ import {
   startTransition,
 } from 'react';
 import styled from 'styled-components';
-import KakaoMap from './components/KakaoMap';
-import StoreFilter from './components/StoreFilter';
-import { fetchStores } from './services/storeService';
-import { chain, debounce } from 'lodash-es';
-import './App.css';
-import SearchBar from './components/SearchBar';
+import KakaoMap from '@/components/KakaoMap';
+import StoreFilter from '@/components/StoreFilter';
+import { fetchStores } from '@/services/storeService';
+import chain from 'lodash/chain';
+import debounce from 'lodash/debounce';
+import SearchBar from '@/components/SearchBar';
 import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 interface Store {
   name: string;
@@ -166,7 +169,7 @@ const StoreCategory = styled.span`
   max-width: 100px;
 `;
 
-function App() {
+export default function HomePage() {
   const stores = useMemo(fetchStores, []);
   const categories = useMemo(
     () => [...new Set(fetchStores().map((store) => store.category))],
@@ -315,7 +318,7 @@ function App() {
       return;
     }
 
-    const filtered = chain(stores)
+    const filtered = stores
       .filter((store) =>
         bounds.contain(new kakao.maps.LatLng(store.lat, store.lng))
       )
@@ -330,8 +333,7 @@ function App() {
           Math.pow(centerLat - b.lat, 2) + Math.pow(centerLng - b.lng, 2);
         return aDistance - bDistance;
       })
-      .take(499)
-      .value();
+      .slice(0, 499);
 
     startTransition(() => {
       setStoresInBound(filtered ?? []);
@@ -480,5 +482,3 @@ function App() {
     </AppContainer>
   );
 }
-
-export default App;

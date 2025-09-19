@@ -33,20 +33,20 @@ const CategoryContainer = styled.div`
   }
 `;
 
-const CategoryButton = styled.button<{ active: boolean }>`
+const CategoryButton = styled.button<{ $active: boolean }>`
   padding: 6px 12px;
   border: none;
   border-radius: 16px;
-  background-color: ${(props) => (props.active ? '#2D64BC' : '#f5f7fa')};
-  color: ${(props) => (props.active ? 'white' : '#666')};
+  background-color: ${(props) => (props.$active ? '#2D64BC' : '#f5f7fa')};
+  color: ${(props) => (props.$active ? 'white' : '#666')};
   font-size: 13px;
-  font-weight: ${(props) => (props.active ? '500' : 'normal')};
+  font-weight: ${(props) => (props.$active ? '500' : 'normal')};
   cursor: pointer;
   transition: all 0.2s ease;
   white-space: nowrap;
 
   &:hover {
-    background-color: ${(props) => (props.active ? '#2D64BC' : '#eef1f5')};
+    background-color: ${(props) => (props.$active ? '#2D64BC' : '#eef1f5')};
   }
 `;
 
@@ -75,14 +75,14 @@ const StoreFilter = ({
         <SectionTitle>카테고리</SectionTitle>
         <CategoryContainer ref={animateParent}>
           <CategoryButton
-            active={selectedCategory === '전체'}
+            $active={selectedCategory === '전체'}
             onClick={() => handleCategoryClick('전체')}
           >
             전체
           </CategoryButton>
           {selectedCategory !== '전체' && !storesInBound.some((s) => s.category === selectedCategory) && (
             <CategoryButton
-              active={true}
+              $active={true}
               onClick={() => handleCategoryClick('전체')}
             >
               {(() => {
@@ -104,7 +104,7 @@ const StoreFilter = ({
             .map((category) => (
               <CategoryButton
                 key={category}
-                active={selectedCategory === category}
+                $active={selectedCategory === category}
                 onClick={() => handleCategoryClick(category)}
                 title={category}
               >

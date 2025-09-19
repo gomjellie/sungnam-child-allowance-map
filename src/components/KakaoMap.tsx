@@ -131,6 +131,7 @@ const InfoCategory = styled.span`
 `;
 
 const InfoAddressContainer = styled.button`
+  border: none;
   display: flex;
   align-items: center;
   gap: 4px;
@@ -176,7 +177,7 @@ const CopyIconContainer = styled.div`
 `;
 
 import { useEffect, useState, useRef } from 'react';
-import { thru } from 'lodash-es';
+import thru from 'lodash/thru';
 import { toast } from 'react-toastify';
 
 // 두 지점 간의 거리를 계산하는 함수 (Haversine formula)

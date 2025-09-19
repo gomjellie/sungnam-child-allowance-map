@@ -1,0 +1,25 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html,
+body {
+  font-family: 'Noto Sans KR', sans-serif;
+  height: 100%;
+  overflow: hidden;
+}
+
+#__next {
+  height: 100%;
+}
+
+a {
+  color: #2d64bc;
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
