@@ -5,18 +5,32 @@ export const metadata: Metadata = {
   title: '성남시 아동수당 가맹점 지도',
   description: '성남시 아동수당 가맹점의 위치를 지도에서 쉽게 찾아보세요',
   manifest: '/manifest.json',
-  themeColor: '#2d64bc',
-  viewport: {
-    width: 'device-width',
-    initialScale: 1,
-    maximumScale: 1,
-    userScalable: false,
-    viewportFit: 'cover',
-  },
   appleWebApp: {
     capable: true,
     statusBarStyle: 'default',
+    title: '아동수당 가맹점 지도',
   },
+  formatDetection: {
+    telephone: false,
+  },
+  icons: {
+    icon: [
+      { url: '/favicon-16x16.png', sizes: '16x16', type: 'image/png' },
+      { url: '/favicon-32x32.png', sizes: '32x32', type: 'image/png' },
+    ],
+    apple: [
+      { url: '/apple-touch-icon.png', sizes: '180x180', type: 'image/png' },
+    ],
+  },
+};
+
+export const viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
+  viewportFit: 'cover',
+  themeColor: '#2d64bc',
 };
 
 export default function RootLayout({

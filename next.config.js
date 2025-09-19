@@ -1,21 +1,12 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  // PWA 기능을 위한 설정
-  async headers() {
-    return [
-      {
-        source: '/manifest.json',
-        headers: [
-          {
-            key: 'Content-Type',
-            value: 'application/manifest+json',
-          },
-        ],
-      },
-    ];
-  },
-  // 카카오맵 API를 위한 이미지 도메인 설정
+  output: 'export',
+  trailingSlash: true,
+  skipTrailingSlashRedirect: true,
+  distDir: 'out',
+  // GitHub Pages에서는 이미지 최적화가 지원되지 않으므로 비활성화
   images: {
+    unoptimized: true,
     domains: ['dapi.kakao.com'],
   },
 };
