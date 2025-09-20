@@ -3,40 +3,59 @@
   "short_name": "아동수당 가맹점 지도",
   "description": "성남시 아동수당 가맹점의 위치를 지도에서 쉽게 찾아보세요",
   "start_url": "/",
-  "display": "fullscreen",
+  "display": "standalone",
+  "display_override": ["window-controls-overlay", "standalone"],
   "background_color": "#ffffff",
   "theme_color": "#2d64bc",
-  "orientation": "portrait",
+  "orientation": "portrait-primary",
+  "categories": ["navigation", "utilities", "maps"],
+  "lang": "ko",
+  "scope": "/",
   "icons": [
     {
       "src": "/android-chrome-192x192.png",
       "sizes": "192x192",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any maskable"
     },
     {
       "src": "/android-chrome-512x512.png",
       "sizes": "512x512",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any maskable"
     },
     {
       "src": "/apple-touch-icon.png",
       "sizes": "180x180",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any"
     },
     {
       "src": "/favicon-32x32.png",
       "sizes": "32x32",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any"
     },
     {
       "src": "/favicon-16x16.png",
       "sizes": "16x16",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any"
     },
     {
       "src": "/favicon.svg",
       "sizes": "any",
-      "type": "image/svg+xml"
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "/screen_shot.png",
+      "sizes": "929x1486",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "성남시 아동수당 가맹점 지도 - 모바일 화면"
     }
   ]
 }

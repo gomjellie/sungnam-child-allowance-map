@@ -100,6 +100,8 @@ jobs:
           find out -name "*.html" -type f -exec sed -i 's|href="/favicon-32x32\.png"|href="/sungnam-child-allowance-map/favicon-32x32.png"|g' {} \;
           find out -name "*.html" -type f -exec sed -i 's|href="/apple-touch-icon\.png"|href="/sungnam-child-allowance-map/apple-touch-icon.png"|g' {} \;
           find out -name "*.html" -type f -exec sed -i 's|href="/favicon\.svg"|href="/sungnam-child-allowance-map/favicon.svg"|g' {} \;
+          # manifest.json 파일 내부의 아이콘 경로도 수정
+          sed -i 's|"src": "/|"src": "/sungnam-child-allowance-map/|g' out/manifest.json
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
