@@ -87,10 +87,18 @@ jobs:
         run: ${{ steps.detect-package-manager.outputs.runner }} next build
         env:
           NEXT_PUBLIC_KAKAO_API_KEY: ${{ secrets.NEXT_PUBLIC_KAKAO_API_KEY }}
+          NODE_ENV: production
       - name: Add .nojekyll file
         run: touch out/.nojekyll
       - name: Add CNAME file
         run: echo "sungnam.inkyu.store" > out/CNAME
+      - name: Fix manifest path for GitHub Pages
+        run: |
+          # GitHub Pages에서 repository 경로를 포함한 manifest.json 경로로 수정
+          find out -name "*.html" -type f -exec sed -i 's|href="/manifest\.json"|href="/sungnam-child-allowance-map/manifest.json"|g' {} \;
+          find out -name "*.html" -type f -exec sed -i 's|href="/favicon-16x16\.png"|href="/sungnam-child-allowance-map/favicon-16x16.png"|g' {} \;
+          find out -name "*.html" -type f -exec sed -i 's|href="/favicon-32x32\.png"|href="/sungnam-child-allowance-map/favicon-32x32.png"|g' {} \;
+          find out -name "*.html" -type f -exec sed -i 's|href="/apple-touch-icon\.png"|href="/sungnam-child-allowance-map/apple-touch-icon.png"|g' {} \;
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
