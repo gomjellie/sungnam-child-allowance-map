@@ -99,6 +99,7 @@ jobs:
           find out -name "*.html" -type f -exec sed -i 's|href="/favicon-16x16\.png"|href="/sungnam-child-allowance-map/favicon-16x16.png"|g' {} \;
           find out -name "*.html" -type f -exec sed -i 's|href="/favicon-32x32\.png"|href="/sungnam-child-allowance-map/favicon-32x32.png"|g' {} \;
           find out -name "*.html" -type f -exec sed -i 's|href="/apple-touch-icon\.png"|href="/sungnam-child-allowance-map/apple-touch-icon.png"|g' {} \;
+          find out -name "*.html" -type f -exec sed -i 's|href="/favicon\.svg"|href="/sungnam-child-allowance-map/favicon.svg"|g' {} \;
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
