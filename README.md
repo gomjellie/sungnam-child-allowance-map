@@ -1,4 +1,4 @@
-# [성남시 아동수당 가맹점 지도](https://sungnam.inkyu.store)
+# [성남시 아동수당 가맹점 지도](https://gomjellie.github.io/sungnam-child-allowance-map/)
 
 ## 문제 정의
 성남시 아동수당 가맹점들을 위치기반으로 찾기가 어려움. 
